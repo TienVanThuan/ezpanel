@@ -1,0 +1,18 @@
+# Dependabot tự đề xuất cập nhật thư viện (kể cả bản vá bảo mật) và GitHub Actions; quy trình "Kiểm tra" dựng thử mỗi đề xuất.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      electron:
+        patterns: ['electron', 'electron-builder', 'electron-updater']
+      thu-vien:
+        patterns: ['*']
+        exclude-patterns: ['electron', 'electron-builder', 'electron-updater']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

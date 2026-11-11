@@ -1,0 +1,28 @@
+# Kiểm tra mỗi thay đổi (kể cả đề xuất cập nhật của Dependabot): cài thư viện, kiểm tra cú pháp, dựng thử ứng dụng Windows.
+name: Kiểm tra
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Kiểm tra cú pháp
+        shell: bash
+        run: for f in server.js lib/*.js electron/*.js public/app.js; do node --check "$f" || exit 1; done
+      - name: Phần xử lý khởi động được
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/ezdata"
+          TPANEL_DATA="$RUNNER_TEMP/ezdata" node server.js & PID=$!
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:2083/api/health && break; sleep 1; done
+          curl -sf http://127.0.0.1:2083/api/health; ok=$?; kill $PID; exit $ok
+      - name: Dựng thử ứng dụng (không đăng)
+        run: npx electron-builder --win --x64 --dir --publish never

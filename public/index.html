@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EzPanel</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<section id="setup" class="setup" hidden></section>
+
+<section id="login" class="login" hidden>
+  <form id="loginForm" class="login-box">
+    <img class="login-logo" src="logo.png" alt="" width="72" height="72">
+    <h1>EzPanel</h1>
+    <p class="muted">Bảng điều khiển máy chủ local</p>
+    <div class="field"><label for="pw">Mật khẩu</label>
+      <input id="pw" type="password" autocomplete="current-password" required autofocus></div>
+    <p id="loginError" class="error" role="alert"></p>
+    <button class="btn primary block" type="submit">Đăng nhập <svg class="ic" aria-hidden="true"><use href="icons.svg#i-arrow-right"/></svg></button>
+  </form>
+</section>
+
+<div id="app" class="shell" hidden>
+  <nav class="side" aria-label="Điều hướng">
+    <div class="brand"><img class="logo" src="logo.png" alt="" width="34" height="34"><div><b>EzPanel</b><span id="modeTag">Máy chủ local</span></div></div>
+    <a href="#overview" data-view="overview"><svg class="ic" aria-hidden="true"><use href="icons.svg#i-layout-dashboard"/></svg><span>Tổng quan</span></a>
+    <p class="nav-group">Dự án</p>
+    <a href="#laragon" data-view="laragon"><svg class="ic" aria-hidden="true"><use href="icons.svg#i-server"/></svg><span>Máy chủ &amp; dự án</span><span class="led-count" id="ledLaragon"></span></a>
+    <a href="#wp" data-view="wp"><svg class="ic" aria-hidden="true"><use href="icons.svg#i-newspaper"/></svg><span>WordPress</span></a>
+    <a href="#import" data-view="import"><svg class="ic" aria-hidden="true"><use href="icons.svg#i-download-cloud"/></svg><span>Nhập site</span></a>
+    <a href="#backups" data-view="backups"><svg class="ic" aria-hidden="true"><use href="icons.svg#i-archive"/></svg><span>Sao lưu</span></a>
+    <p class="nav-group">Công cụ</p>
+    <a href="#db" data-view="db"><svg class="ic" aria-hidden="true"><use href="icons.svg#i-database"/></svg><span>Database</span></a>
+    <a href="#mail" data-view="mail"><svg class="ic" aria-hidden="true"><use href="icons.svg#i-mail"/></svg><span>Email</span><span class="badge" id="mailBadge" hidden></span></a>
+    <a href="#logs" data-view="logs"><svg class="ic" aria-hidden="true"><use href="icons.svg#i-scroll-text"/></svg><span>Nhật ký</span></a>
+    <a href="#terminal" data-view="terminal"><svg class="ic" aria-hidden="true"><use href="icons.svg#i-terminal-square"/></svg><span>Terminal</span></a>
+    <a href="#files" data-view="files"><svg class="ic" aria-hidden="true"><use href="icons.svg#i-folder-tree"/></svg><span>Quản lý file</span></a>
+    <p class="nav-group">Khác</p>
+    <a href="#sites" data-view="sites"><svg class="ic" aria-hidden="true"><use href="icons.svg#i-globe"/></svg><span>Website tĩnh</span><span class="led-count" id="ledSites"></span></a>
+    <a href="#services" data-view="services"><svg class="ic" aria-hidden="true"><use href="icons.svg#i-cog"/></svg><span>Dịch vụ Windows</span><span class="led-count" id="ledServices"></span></a>
+    <a href="#settings" data-view="settings"><svg class="ic" aria-hidden="true"><use href="icons.svg#i-settings"/></svg><span>Cài đặt</span></a>
+    <button class="logout" id="logout" type="button"><svg class="ic" aria-hidden="true"><use href="icons.svg#i-log-out"/></svg><span>Đăng xuất</span></button>
+  </nav>
+  <main id="view" class="main" tabindex="-1"></main>
+  <section id="termRoot" class="term-root" hidden></section>
+</div>
+
+<dialog id="editor" class="editor">
+  <form method="dialog" class="editor-head">
+    <strong id="editorTitle"></strong>
+    <span class="muted" id="editorState"></span>
+    <button class="btn primary" id="editorSave" type="button">Lưu (Ctrl+S)</button>
+    <button class="btn" value="close">Đóng</button>
+  </form>
+  <textarea id="editorText" class="code" spellcheck="false"></textarea>
+</dialog>
+
+<div id="toasts" class="toasts" aria-live="polite"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

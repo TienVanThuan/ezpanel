@@ -1,0 +1,112 @@
+{
+  "name": "ezpanel",
+  "version": "3.0.5",
+  "description": "EzPanel: bảng điều khiển máy chủ local cho Windows (Apache, PHP, MySQL, WordPress, WooCommerce)",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "server": "node server.js",
+    "dist": "electron-builder --win --x64 --publish never"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
+    "archiver": "^7.0.1",
+    "electron-updater": "^6.8.11",
+    "express": "^4.21.2",
+    "extract-zip": "^2.0.1",
+    "multer": "^2.0.2",
+    "mysql2": "^3.11.5",
+    "node-forge": "^1.4.3",
+    "node-pty": "^1.1.0",
+    "qrcode-generator": "^1.5.2",
+    "sql.js": "^1.12.0",
+    "ssh2": "^1.17.0",
+    "tar": "^7.5.22",
+    "ws": "^8.22.2",
+    "yauzl": "^3.4.0"
+  },
+  "productName": "EzPanel",
+  "author": "EzPanel",
+  "build": {
+    "appId": "vn.ezpanel.app",
+    "productName": "EzPanel",
+    "asar": false,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist{,/**}",
+      "!installer{,/**}",
+      "!desktop{,/**}",
+      "!tools{,/**}",
+      "!data{,/**}",
+      "!logs{,/**}",
+      "!backups{,/**}",
+      "!ssl{,/**}",
+      "!runtime{,/**}",
+      "!config.json",
+      "!sites.json",
+      "!laragon-state.json",
+      "!setup.cmd",
+      "!start.bat",
+      "!node_modules/node-pty/build{,/**}",
+      "!node_modules/cpu-features{,/**}",
+      "!node_modules/node-pty/prebuilds/{darwin-*,win32-arm64,linux-*}{,/**}",
+      "!node_modules/sql.js/dist/{sql-asm*,sql-wasm-debug*,sql-asm-debug*,sql-asm-memory-growth*,worker.*,sqljs-*}",
+      "!node_modules/**/{*.md,*.map,*.d.ts,test,tests,__tests__,example,examples,docs}",
+      "!node_modules/sql.js/dist/{sql-wasm-browser*,sql-wasm-inline*}",
+      "!.github{,/**}"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "electron/icons/tpanel.ico",
+      "artifactName": "EzPanel-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "EzPanel",
+      "include": "electron/installer.nsh",
+      "deleteAppDataOnUninstall": false,
+      "installerLanguages": [
+        "vi_VN"
+      ],
+      "language": "1066",
+      "installerIcon": "electron/icons/tpanel.ico",
+      "uninstallerIcon": "electron/icons/tpanel.ico",
+      "runAfterFinish": true
+    },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://github.com/"
+      }
+    ],
+    "npmRebuild": false,
+    "nodeGypRebuild": false,
+    "electronLanguages": [
+      "vi",
+      "en-US",
+      "ja"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^45.3.0",
+    "electron-builder": "^26.18.0"
+  }
+}

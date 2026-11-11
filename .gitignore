@@ -1,0 +1,10 @@
+node_modules/
+dist/
+config.json
+sites.json
+laragon-state.json
+data/
+tools/
+logs/
+backups/
+ssl/

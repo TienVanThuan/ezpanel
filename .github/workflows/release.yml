@@ -1,0 +1,32 @@
+# Phát hành EzPanel: vào tab Actions → "Phát hành EzPanel" → Run workflow → nhập số phiên bản (ví dụ 3.0.6).
+# GitHub dựng bộ cài trên Windows rồi đăng lên Releases (kèm latest.yml, .blockmap); EzPanel trên mọi máy tự thấy bản mới.
+name: Phát hành EzPanel
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Số phiên bản mới, ví dụ 3.0.6 (phải lớn hơn bản đang dùng)'
+        required: true
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Đặt phiên bản và nơi đăng bản phát hành
+        run: node .github/scripts/set-version.js
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          RELEASE_REPO: ${{ vars.RELEASE_REPO }}
+      - name: Dựng bộ cài và đăng lên GitHub Releases
+        run: npx electron-builder --win --x64 --publish always
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}

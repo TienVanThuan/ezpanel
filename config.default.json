@@ -1,0 +1,30 @@
+{
+  "host": "127.0.0.1",
+  "port": 2083,
+  "password": "admin123",
+  "fileRoot": "./data",
+  "sitesDir": "./data/sites",
+  "sqliteDir": "./data/sqlite",
+  "sitesPort": 8080,
+  "mysql": {
+    "host": "127.0.0.1",
+    "port": 3306,
+    "user": "root",
+    "password": ""
+  },
+  "services": [
+    "MySQL80",
+    "Apache2.4",
+    "W3SVC"
+  ],
+  "laragon": {
+    "root": "C:/laragon",
+    "domainSuffix": ".test",
+    "httpPort": 80,
+    "phpBasePort": 9100,
+    "phpWorkers": 4,
+    "lanBasePort": 8100,
+    "autoStart": false
+  },
+  "setupDone": false
+}
