@@ -2780,8 +2780,9 @@ async function loadUpdatesPanel() {
         <button class="btn small" id="suDrop">Bỏ</button></div>` : ''}
     ${su.backup ? `<p class="sub">Bản trước (${h(su.backup)}) được giữ để quay lại: <button class="btn small" id="suBack">Quay lại ${h(su.backup)}</button></p>` : ''}
     <details style="margin:.4rem 0 1rem"><summary class="sub" style="cursor:pointer">Nguồn cập nhật tự động (GitHub Releases)</summary>
-      <form id="suRepo" class="row" style="margin-top:.6rem"><input id="suRepoIn" class="grow" placeholder="chu-so-huu/tpanel" value="${h(su.repo || '')}">
+      <form id="suRepo" class="row" style="margin-top:.6rem"><input id="suRepoIn" class="grow" placeholder="${h(su.repoBuiltIn ? `Mặc định của bộ cài: ${su.repoBuiltIn}` : 'chu-so-huu/ezpanel')}" value="${h(su.repoCustom || '')}">
         <button class="btn small">Lưu</button></form>
+      ${su.repo ? `<p class="sub">Đang dùng: <b>${h(su.repo)}</b>${su.repoCustom ? '' : ' (mặc định của bộ cài, không cần nhập)'}. Để trống ô trên rồi Lưu để quay về mặc định.</p>` : ''}
       <p class="sub">Mỗi bản phát hành cần tệp tpanel-x.y.z.zip (và tpanel-x.y.z.zip.sha256 để kiểm tra mã băm). EzPanel tự kiểm tra mỗi ngày.</p></details>
     ${up.standalone ? `
       <div class="row" style="justify-content:space-between;align-items:center"><b>Phần mềm đi kèm</b>

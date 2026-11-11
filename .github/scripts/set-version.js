@@ -8,5 +8,6 @@ if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error(`Số phiên bản không 
 const [owner, repo] = String(process.env.RELEASE_REPO || process.env.GITHUB_REPOSITORY).split('/');
 p.version = version;
 p.build.publish = [{ provider: 'github', owner, repo, releaseType: 'release' }];
+p.ezpanelUpdateRepo = `${owner}/${repo}`; // EzPanel dùng làm nguồn tự cập nhật mặc định
 fs.writeFileSync('package.json', JSON.stringify(p, null, 2));
 console.log(`EzPanel ${version} → đăng lên https://github.com/${owner}/${repo}/releases`);
