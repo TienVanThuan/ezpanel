@@ -26,18 +26,27 @@ jobs:
         env:
           INPUT_VERSION: ${{ github.event.inputs.version }}
           RELEASE_REPO: ${{ vars.RELEASE_REPO }}
-      - name: Dựng bộ cài và tải lên bản nháp trên GitHub Releases
-        run: npx electron-builder --win --x64 --publish always
-        env:
-          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
-      - name: Công bố bản phát hành (tạo thẻ vX.Y.Z)
+      - name: Dựng bộ cài (chưa đăng)
+        run: npx electron-builder --win --x64 --publish never
+      - name: Đăng lên GitHub Releases (bộ cài, .blockmap, latest.yml)
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
           TARGET_REPO: ${{ vars.RELEASE_REPO || github.repository }}
         run: |
           V=$(node -p "require('./package.json').version")
-          # Cùng kho mã nguồn: thẻ trỏ vào đúng lần commit vừa dựng; kho phát hành riêng: thẻ trỏ vào nhánh mặc định của kho đó
+          FILES="dist/EzPanel-Setup-$V.exe dist/EzPanel-Setup-$V.exe.blockmap dist/latest.yml"
+          # Thiếu tệp nào thì dừng, không công bố bản phát hành dở dang
+          for f in $FILES; do [ -s "$f" ] || { echo "::error::Thiếu tệp $f"; exit 1; }; done
+          ls -la $FILES
+          NOTES=$(git log -1 --pretty=%B)
+          # Cùng kho mã nguồn: thẻ trỏ vào đúng lần commit vừa dựng; kho phát hành riêng: nhánh mặc định của kho đó
           if [ "$TARGET_REPO" = "$GITHUB_REPOSITORY" ]; then TARGET="--target $GITHUB_SHA"; else TARGET=""; fi
-          gh release edit "v$V" --repo "$TARGET_REPO" --draft=false --latest $TARGET
-          echo "Đã công bố: https://github.com/$TARGET_REPO/releases/tag/v$V"
+          if gh release view "v$V" --repo "$TARGET_REPO" >/dev/null 2>&1; then
+            echo "Bản v$V đã có: tải bổ sung / thay các tệp rồi công bố"
+            gh release upload "v$V" $FILES --repo "$TARGET_REPO" --clobber
+            gh release edit "v$V" --repo "$TARGET_REPO" --draft=false --latest
+          else
+            gh release create "v$V" $FILES --repo "$TARGET_REPO" --title "EzPanel $V" --notes "$NOTES" --latest $TARGET
+          fi
+          echo "Đã đăng: https://github.com/$TARGET_REPO/releases/tag/v$V"

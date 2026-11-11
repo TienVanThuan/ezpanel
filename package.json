@@ -1,6 +1,6 @@
 {
   "name": "ezpanel",
-  "version": "3.0.5",
+  "version": "3.0.8",
   "description": "EzPanel: bảng điều khiển máy chủ local cho Windows (Apache, PHP, MySQL, WordPress, WooCommerce)",
   "main": "electron/main.js",
   "scripts": {
@@ -93,8 +93,10 @@
     },
     "publish": [
       {
-        "provider": "generic",
-        "url": "https://github.com/"
+        "provider": "github",
+        "owner": "TienVanThuan",
+        "repo": "ezpanel",
+        "releaseType": "draft"
       }
     ],
     "npmRebuild": false,
@@ -108,5 +110,6 @@
   "devDependencies": {
     "electron": "^45.3.0",
     "electron-builder": "^26.18.0"
-  }
+  },
+  "ezpanelUpdateRepo": "TienVanThuan/ezpanel"
 }
