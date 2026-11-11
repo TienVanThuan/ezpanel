@@ -7,7 +7,8 @@ const version = String(process.env.INPUT_VERSION || fromTag || p.version).trim()
 if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error(`Số phiên bản không hợp lệ: "${version}" (đúng dạng: 3.0.6)`);
 const [owner, repo] = String(process.env.RELEASE_REPO || process.env.GITHUB_REPOSITORY).split('/');
 p.version = version;
-p.build.publish = [{ provider: 'github', owner, repo, releaseType: 'release' }];
+// Tạo ở dạng nháp (không cần thẻ có sẵn); bước cuối của quy trình mới công bố và tạo thẻ vX.Y.Z
+p.build.publish = [{ provider: 'github', owner, repo, releaseType: 'draft' }];
 p.ezpanelUpdateRepo = `${owner}/${repo}`; // EzPanel dùng làm nguồn tự cập nhật mặc định
 fs.writeFileSync('package.json', JSON.stringify(p, null, 2));
 console.log(`EzPanel ${version} → đăng lên https://github.com/${owner}/${repo}/releases`);

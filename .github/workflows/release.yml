@@ -26,7 +26,18 @@ jobs:
         env:
           INPUT_VERSION: ${{ github.event.inputs.version }}
           RELEASE_REPO: ${{ vars.RELEASE_REPO }}
-      - name: Dựng bộ cài và đăng lên GitHub Releases
+      - name: Dựng bộ cài và tải lên bản nháp trên GitHub Releases
         run: npx electron-builder --win --x64 --publish always
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+      - name: Công bố bản phát hành (tạo thẻ vX.Y.Z)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          TARGET_REPO: ${{ vars.RELEASE_REPO || github.repository }}
+        run: |
+          V=$(node -p "require('./package.json').version")
+          # Cùng kho mã nguồn: thẻ trỏ vào đúng lần commit vừa dựng; kho phát hành riêng: thẻ trỏ vào nhánh mặc định của kho đó
+          if [ "$TARGET_REPO" = "$GITHUB_REPOSITORY" ]; then TARGET="--target $GITHUB_SHA"; else TARGET=""; fi
+          gh release edit "v$V" --repo "$TARGET_REPO" --draft=false --latest $TARGET
+          echo "Đã công bố: https://github.com/$TARGET_REPO/releases/tag/v$V"
