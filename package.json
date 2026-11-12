@@ -1,7 +1,7 @@
 {
-  "name": "ezpanel",
-  "version": "3.0.8",
-  "description": "EzPanel: bảng điều khiển máy chủ local cho Windows (Apache, PHP, MySQL, WordPress, WooCommerce)",
+  "name": "sitebench",
+  "version": "3.0.9",
+  "description": "Sitebench: bàn làm việc cho website trên máy local (Windows): Apache, PHP, MySQL, WordPress, WooCommerce",
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
@@ -29,11 +29,11 @@
     "ws": "^8.22.2",
     "yauzl": "^3.4.0"
   },
-  "productName": "EzPanel",
-  "author": "EzPanel",
+  "productName": "Sitebench",
+  "author": "Sitebench",
   "build": {
     "appId": "vn.ezpanel.app",
-    "productName": "EzPanel",
+    "productName": "Sitebench",
     "asar": false,
     "directories": {
       "output": "dist"
@@ -71,8 +71,8 @@
           ]
         }
       ],
-      "icon": "electron/icons/tpanel.ico",
-      "artifactName": "EzPanel-Setup-${version}.${ext}"
+      "icon": "electron/icons/sitebench.ico",
+      "artifactName": "Sitebench-Setup-${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,
@@ -80,23 +80,21 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "EzPanel",
+      "shortcutName": "Sitebench",
       "include": "electron/installer.nsh",
       "deleteAppDataOnUninstall": false,
       "installerLanguages": [
         "vi_VN"
       ],
       "language": "1066",
-      "installerIcon": "electron/icons/tpanel.ico",
-      "uninstallerIcon": "electron/icons/tpanel.ico",
+      "installerIcon": "electron/icons/sitebench.ico",
+      "uninstallerIcon": "electron/icons/sitebench.ico",
       "runAfterFinish": true
     },
     "publish": [
       {
-        "provider": "github",
-        "owner": "TienVanThuan",
-        "repo": "ezpanel",
-        "releaseType": "draft"
+        "provider": "generic",
+        "url": "https://github.com/"
       }
     ],
     "npmRebuild": false,
@@ -110,6 +108,5 @@
   "devDependencies": {
     "electron": "^45.3.0",
     "electron-builder": "^26.18.0"
-  },
-  "ezpanelUpdateRepo": "TienVanThuan/ezpanel"
+  }
 }

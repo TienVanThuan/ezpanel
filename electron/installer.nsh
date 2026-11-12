@@ -1,6 +1,6 @@
-; Bổ sung cho bộ cài EzPanel (electron-builder).
+; Bổ sung cho bộ cài Sitebench (electron-builder).
 ; Gặp bản cũ tPanel 2.0.x (ứng dụng khay C#): giữ lại cài đặt, sao lưu, dữ liệu vào %LOCALAPPDATA%\tPanel-ban-cu
-; (EzPanel tự chuyển sang %APPDATA%\EzPanel khi mở lần đầu), ghi nhớ "chạy cùng Windows", rồi gỡ phần chương trình cũ.
+; (Sitebench tự chuyển sang %APPDATA%\Sitebench khi mở lần đầu), ghi nhớ "chạy cùng Windows", rồi gỡ phần chương trình cũ.
 
 !macro customInit
   ReadRegStr $0 HKCU "Software\tPanel" "InstallDir"
@@ -20,7 +20,7 @@
       CopyFiles /SILENT "$0\data" "$LOCALAPPDATA\tPanel-ban-cu"
     IfFileExists "$0\tools\php-ini\*.*" 0 +2
       CopyFiles /SILENT "$0\tools\php-ini" "$LOCALAPPDATA\tPanel-ban-cu\tools"
-    ; Bản cũ có bật chạy cùng Windows: ghi dấu để EzPanel bật lại cho khóa mới
+    ; Bản cũ có bật chạy cùng Windows: ghi dấu để Sitebench bật lại cho khóa mới
     ReadRegStr $1 HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "tPanel"
     ${If} $1 != ""
       FileOpen $2 "$LOCALAPPDATA\tPanel-ban-cu\autorun.txt" w
@@ -34,4 +34,10 @@
     Delete "$DESKTOP\tPanel.lnk"
     Delete "$SMPROGRAMS\tPanel.lnk"
   ${EndIf}
+!macroend
+
+; Cập nhật từ EzPanel (trước 3.0.9): xóa lối tắt tên cũ (tệp chạy giờ là Sitebench.exe)
+!macro customInstall
+  Delete "$DESKTOP\EzPanel.lnk"
+  Delete "$SMPROGRAMS\EzPanel.lnk"
 !macroend

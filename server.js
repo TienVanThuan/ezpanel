@@ -7,7 +7,7 @@ const { listen, wrap: wrapAsync } = require('./lib/util');
 
 // ---------- Cấu hình ----------
 // APP: mã nguồn (chỉ đọc). ROOT: dữ liệu (cài đặt, công cụ, sao lưu, nhật ký).
-// Bản Electron truyền TPANEL_DATA = %APPDATA%\EzPanel để cập nhật / cài lại không bao giờ đụng tới dữ liệu.
+// Bản Electron truyền TPANEL_DATA = %APPDATA%\Sitebench để cập nhật / cài lại không bao giờ đụng tới dữ liệu.
 const APP = __dirname;
 const ROOT = process.env.TPANEL_DATA ? path.resolve(process.env.TPANEL_DATA) : __dirname;
 fs.mkdirSync(ROOT, { recursive: true });
@@ -27,7 +27,7 @@ config.paths = {
   backups: path.join(ROOT, 'backups'),
   ssl: path.join(ROOT, 'ssl'), // vị trí cũ, chỉ dùng khi chưa có Laragon
   // Dữ liệu gắn với cấu hình Apache của Laragon (chứng chỉ, trạng thái dự án) nằm trong chính Laragon,
-  // để chuyển hoặc cài lại EzPanel không làm hỏng Apache
+  // để chuyển hoặc cài lại Sitebench không làm hỏng Apache
   laragonData: () => {
     const root = path.resolve(config.laragon?.root || 'C:/laragon');
     return fs.existsSync(path.join(root, 'www')) ? path.join(root, 'etc', 'localpanel') : null;
@@ -84,7 +84,7 @@ function startSession(res) {
 }
 
 app.post('/api/login', (req, res) => {
-  if (!config.setupDone) return res.status(409).json({ error: 'EzPanel chưa được thiết lập.', setup: true });
+  if (!config.setupDone) return res.status(409).json({ error: 'Sitebench chưa được thiết lập.', setup: true });
   if (!sameSecret(req.body?.password ?? '', config.password)) {
     return res.status(401).json({ error: 'Sai mật khẩu.' });
   }
@@ -105,12 +105,12 @@ app.get('/api/setup/status', (req, res) => {
     setupDone: !!config.setupDone,
     windows: process.platform === 'win32',
     laragon: runtime ? runtime.findLaragon() : [],
-    suggestRoot: drive ? path.join(drive, 'EzPanel').split(path.sep).join('/') : '/tmp/tpanel-root',
+    suggestRoot: drive ? path.join(drive, 'Sitebench').split(path.sep).join('/') : '/tmp/tpanel-root',
   });
 });
 app.post('/api/setup', (req, res, next) => {
   try {
-    if (config.setupDone) return res.status(403).json({ error: 'EzPanel đã được thiết lập.' });
+    if (config.setupDone) return res.status(403).json({ error: 'Sitebench đã được thiết lập.' });
     const b = req.body || {};
     if (typeof b.password !== 'string' || b.password.length < 8) return res.status(400).json({ error: 'Mật khẩu cần ít nhất 8 ký tự.' });
     if (b.mode === 'laragon') {
@@ -126,7 +126,7 @@ app.post('/api/setup', (req, res, next) => {
     config.password = b.password;
     config.save();
     startSession(res);
-    const job = jobs.start('Dựng máy chủ EzPanel', async ctx => {
+    const job = jobs.start('Dựng máy chủ Sitebench', async ctx => {
       const out = await runtime.setupStandalone(ctx, b);
       config.setupDone = true;
       config.save();
@@ -142,7 +142,7 @@ app.post('/api/logout', (req, res) => {
   res.json({ ok: true });
 });
 
-// Mã điều khiển cho ứng dụng ở khay hệ thống (EzPanel.exe), chỉ đọc được trên máy này
+// Mã điều khiển cho ứng dụng ở khay hệ thống (Sitebench.exe), chỉ đọc được trên máy này
 const CONTROL_TOKEN = crypto.randomBytes(24).toString('hex');
 fs.mkdirSync(config.paths.tools, { recursive: true });
 fs.writeFileSync(path.join(config.paths.tools, '.control-token'), CONTROL_TOKEN);
@@ -162,7 +162,7 @@ const certs = require('./lib/certs')(config);
 const laragon = require('./lib/laragon')(config, certs);
 
 // Danh sách chứng chỉ gốc cho PHP (PHP bản Windows không kèm sẵn → cURL error 60 khi cập nhật plugin, gọi API HTTPS):
-// lấy danh sách Mozilla có sẵn trong EzPanel + chứng chỉ gốc của EzPanel (để gọi được các site .test qua HTTPS),
+// lấy danh sách Mozilla có sẵn trong Sitebench + chứng chỉ gốc của Sitebench (để gọi được các site .test qua HTTPS),
 // rồi khai báo cho mọi bản PHP qua thư mục .ini dùng chung (PHP_INI_SCAN_DIR)
 function writeCaBundle() {
   try {
@@ -172,7 +172,7 @@ function writeCaBundle() {
     fs.mkdirSync(config.paths.tools, { recursive: true });
     if (!fs.existsSync(bundle) || fs.readFileSync(bundle, 'utf8') !== pem) fs.writeFileSync(bundle, pem);
     const fwdPath = bundle.split(path.sep).join('/');
-    const ini = `; Do EzPanel tạo: danh sách chứng chỉ gốc cho HTTPS của PHP (curl, openssl)\r\ncurl.cainfo = "${fwdPath}"\r\nopenssl.cafile = "${fwdPath}"\r\n`;
+    const ini = `; Do Sitebench tạo: danh sách chứng chỉ gốc cho HTTPS của PHP (curl, openssl)\r\ncurl.cainfo = "${fwdPath}"\r\nopenssl.cafile = "${fwdPath}"\r\n`;
     fs.mkdirSync(config.paths.phpIni, { recursive: true });
     const iniFile = path.join(config.paths.phpIni, 'ezpanel-ca.ini');
     if (!fs.existsSync(iniFile) || fs.readFileSync(iniFile, 'utf8') !== ini) fs.writeFileSync(iniFile, ini);
@@ -192,7 +192,7 @@ app.get('/api/ssl', wrapAsync(async (req, res) => {
 }));
 app.post('/api/ssl/trust', wrapAsync(async (req, res) => { await certs.trust(); res.json({ ok: true }); }));
 app.post('/api/ssl/untrust', wrapAsync(async (req, res) => { await certs.untrust(); res.json({ ok: true }); }));
-app.get('/api/ssl/ca.crt', (req, res) => { certs.ensureCA(); res.download(certs.caPath, 'EzPanel-CA.crt'); });
+app.get('/api/ssl/ca.crt', (req, res) => { certs.ensureCA(); res.download(certs.caPath, 'Sitebench-CA.crt'); });
 app.use('/api/laragon', laragon.router);
 app.use('/api/system', require('./lib/system')(config, { laragon, services }));
 const wordpress = require('./lib/wordpress')(config, laragon);
@@ -261,12 +261,12 @@ app.use((err, req, res, next) => {
   res.status(status).json({ error: err.message || 'Lỗi máy chủ.' });
 });
 
-// Tắt các tiến trình php-cgi khi đóng EzPanel
+// Tắt các tiến trình php-cgi khi đóng Sitebench
 for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP', 'SIGBREAK']) {
   process.on(sig, () => { laragon.stopAll(); process.exit(0); });
 }
 // Ứng dụng khay yêu cầu tắt: dừng php-cgi (và Apache/MySQL nếu được yêu cầu) rồi thoát
-// Khởi động lại EzPanel (ứng dụng khay chạy lại ngay khi thấy mã thoát 75), ví dụ sau khi đổi cổng
+// Khởi động lại Sitebench (ứng dụng khay chạy lại ngay khi thấy mã thoát 75), ví dụ sau khi đổi cổng
 app.locals.restart = () => {
   laragon.stopAll();
   try { mail.kill(); } catch { /* bỏ qua */ }
@@ -290,7 +290,7 @@ process.on('exit', () => { laragon.stopAll(); terminal.stopAll(); mail.kill(); }
     services.autoStart().then(() => mail.autoStart());
     const shown = config.host === '127.0.0.1' ? 'localhost' : config.host;
     console.log('');
-    console.log('  EzPanel đang chạy');
+    console.log('  Sitebench đang chạy');
     console.log(`  Bảng điều khiển:  http://${shown}:${config.port}`);
     console.log(`  Website:          http://<tên-site>.localhost:${config.sitesPort}`);
     if (config.password === 'admin123') {

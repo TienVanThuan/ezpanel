@@ -124,20 +124,20 @@ async function loadDesktop() {
   const box = $('#desktopBox');
   if (!box) return;
   if (!desk) {
-    box.innerHTML = `<h2>Ứng dụng desktop</h2><p class="sub" style="margin:0">Bạn đang mở EzPanel trong trình duyệt. Cài bản desktop (EzPanel-Setup.exe) để có cửa sổ riêng, biểu tượng ở khay hệ thống và chạy cùng Windows.</p>`;
+    box.innerHTML = `<h2>Ứng dụng desktop</h2><p class="sub" style="margin:0">Bạn đang mở Sitebench trong trình duyệt. Cài bản desktop (Sitebench-Setup.exe) để có cửa sổ riêng, biểu tượng ở khay hệ thống và chạy cùng Windows.</p>`;
     return;
   }
   const [info, auto] = await Promise.all([desk.info(), desk.getAutostart()]);
   if (!document.body.contains(box)) return;
   box.innerHTML = `
     <h2>Ứng dụng desktop</h2>
-    <label class="switch"><input type="checkbox" id="autorun" ${auto ? 'checked' : ''}> <span>Chạy EzPanel cùng Windows (ẩn dưới khay hệ thống)</span></label>
-    <p class="sub" style="margin:.6rem 0 0">Đóng cửa sổ thì EzPanel thu vào khay, Apache/MySQL vẫn chạy. Thoát hẳn: chuột phải biểu tượng EzPanel ở khay → Thoát EzPanel.<br>
+    <label class="switch"><input type="checkbox" id="autorun" ${auto ? 'checked' : ''}> <span>Chạy Sitebench cùng Windows (ẩn dưới khay hệ thống)</span></label>
+    <p class="sub" style="margin:.6rem 0 0">Đóng cửa sổ thì Sitebench thu vào khay, Apache/MySQL vẫn chạy. Thoát hẳn: chuột phải biểu tượng Sitebench ở khay → Thoát Sitebench.<br>
       Dữ liệu (cài đặt, sao lưu, nhật ký): <span class="log-path">${h(info.data)}</span></p>`;
   $('#autorun').addEventListener('change', async e => {
     const on = await desk.setAutostart(e.target.checked);
     e.target.checked = on;
-    toast(on ? 'EzPanel sẽ chạy cùng Windows.' : 'Đã tắt chạy cùng Windows.');
+    toast(on ? 'Sitebench sẽ chạy cùng Windows.' : 'Đã tắt chạy cùng Windows.');
   });
 }
 
@@ -687,7 +687,7 @@ async function renderServices() {
 
   view.innerHTML = `
     <h1>Dịch vụ</h1>
-    <p class="lead">Bật, tắt và khởi động lại các dịch vụ Windows như MySQL, Apache hay IIS. Để điều khiển dịch vụ, hãy chạy EzPanel bằng quyền Administrator.</p>
+    <p class="lead">Bật, tắt và khởi động lại các dịch vụ Windows như MySQL, Apache hay IIS. Để điều khiển dịch vụ, hãy chạy Sitebench bằng quyền Administrator.</p>
     ${data.supported ? '' : '<div class="notice">Máy này không chạy Windows nên chỉ xem được danh sách, không bật tắt được dịch vụ.</div>'}
     <form class="panel" id="svcForm">
       <h2>Theo dõi thêm dịch vụ</h2>
@@ -740,7 +740,7 @@ async function loadSsl(anyHttps) {
   box.innerHTML = `
     <h2>Chứng chỉ HTTPS</h2>
     ${st.trusted
-      ? '<p class="sub" style="margin:0"><span class="led on"></span> Chứng chỉ gốc của EzPanel đã được Windows tin cậy: Chrome và Edge mở https://ten.test không báo lỗi.</p>'
+      ? '<p class="sub" style="margin:0"><span class="led on"></span> Chứng chỉ gốc của Sitebench đã được Windows tin cậy: Chrome và Edge mở https://ten.test không báo lỗi.</p>'
       : `<p class="sub" style="margin-top:0">${st.supported
         ? 'Chứng chỉ gốc chưa được cài vào Windows nên trình duyệt sẽ báo "kết nối không an toàn". Bấm nút dưới đây, Windows hỏi xác nhận thì chọn <b>Yes</b>.'
         : 'Cài chứng chỉ gốc vào hệ điều hành để trình duyệt tin cậy các tên miền .test.'}</p>
@@ -778,7 +778,7 @@ async function loadServices() {
       <button class="btn small" data-all="stop">Tắt tất cả</button></div>
     <div class="table-wrap"><table><tbody>${row('apache', 'Apache', st.apache)}${row('mysql', 'MySQL', st.mysql)}</tbody></table></div>
     <div class="toolbar" style="border-top:1px solid var(--line);border-bottom:0">
-      <label class="switch"><input type="checkbox" id="autoStart" ${st.autoStart ? 'checked' : ''}> <span>Tự bật Apache và MySQL khi mở EzPanel</span></label></div>`;
+      <label class="switch"><input type="checkbox" id="autoStart" ${st.autoStart ? 'checked' : ''}> <span>Tự bật Apache và MySQL khi mở Sitebench</span></label></div>`;
   const runSvc = async (btn, svc, action) => {
     const label = { start: 'Đang bật…', stop: 'Đang tắt…', restart: 'Đang khởi động lại…' }[action];
     box.querySelectorAll('button').forEach(b => { b.disabled = true; });
@@ -791,7 +791,7 @@ async function loadServices() {
   box.querySelectorAll('[data-sa]').forEach(b => b.onclick = () => runSvc(b, b.closest('tr').dataset.svc, b.dataset.sa));
   box.querySelectorAll('[data-all]').forEach(b => b.onclick = () => runSvc(b, 'all', b.dataset.all));
   $('#autoStart').onchange = e => act(e.target, () => api('/api/laragon/services/autostart', { method: 'POST', body: { on: e.target.checked } }),
-    e.target.checked ? 'EzPanel sẽ tự bật Apache và MySQL khi mở.' : 'Đã tắt tự bật Apache và MySQL.');
+    e.target.checked ? 'Sitebench sẽ tự bật Apache và MySQL khi mở.' : 'Đã tắt tự bật Apache và MySQL.');
 }
 
 async function renderLaragon() {
@@ -799,7 +799,7 @@ async function renderLaragon() {
   if (!d.detected) {
     view.innerHTML = `
       <h1>Máy chủ &amp; dự án</h1>
-      <p class="lead">Kết nối EzPanel với Laragon để chọn phiên bản PHP riêng cho từng dự án và dùng WP Toolkit.</p>
+      <p class="lead">Kết nối Sitebench với Laragon để chọn phiên bản PHP riêng cho từng dự án và dùng WP Toolkit.</p>
       <div class="notice">Không tìm thấy Laragon tại <b>${h(d.root)}</b>. Nhập đúng thư mục cài Laragon bên dưới.</div>
       ${laragonConfigForm(d)}`;
   bindLaragonConfig();
@@ -826,7 +826,7 @@ async function renderLaragon() {
         <div class="sub"><a href="${h(p.url)}" target="_blank" rel="noopener">${h(p.url)}</a></div>
         ${p.conflict ? '<div class="sub error">Laragon đã tạo lại tệp auto.* nên PHP riêng đang bị lấn át. Bấm Áp dụng để sửa.</div>' : ''}
         ${p.hasVhost ? '' : '<div class="sub">Dự án chưa có tên miền. Bấm "Tạo tên miền" để mở được trên trình duyệt.</div>'}
-        ${p.customConf ? '<div class="sub">Dự án có tệp cấu hình tự viết, EzPanel sẽ giữ nội dung và chỉ thêm phần PHP.</div>' : ''}</td>
+        ${p.customConf ? '<div class="sub">Dự án có tệp cấu hình tự viết, Sitebench sẽ giữ nội dung và chỉ thêm phần PHP.</div>' : ''}</td>
       <td><select data-php aria-label="Phiên bản PHP cho ${h(p.name)}">${opts(p.php)}</select>
         <div class="row" style="gap:.9rem;margin-top:.35rem">
           <label class="switch small"><input type="checkbox" data-https ${p.https ? 'checked' : ''}> <span>HTTPS</span></label>
@@ -845,7 +845,7 @@ async function renderLaragon() {
 
   view.innerHTML = `
     <h1>Máy chủ &amp; dự án</h1>
-    <p class="lead">Bật tắt Apache và MySQL, chọn phiên bản PHP riêng cho từng dự án. Dự án để "Mặc định" dùng PHP đang chọn trong Laragon; dự án chọn bản khác chạy qua php-cgi do EzPanel quản lý.</p>
+    <p class="lead">Bật tắt Apache và MySQL, chọn phiên bản PHP riêng cho từng dự án. Dự án để "Mặc định" dùng PHP đang chọn trong Laragon; dự án chọn bản khác chạy qua php-cgi do Sitebench quản lý.</p>
     <div class="panel" id="sslBox" hidden></div>
     <div class="panel flush" id="svcBox"><div class="toolbar"><strong style="flex:1">Apache và MySQL</strong></div><p class="empty">Đang kiểm tra…</p></div>
     <div class="panel flush">
@@ -1110,7 +1110,7 @@ async function openWpInstall(d) {
         <div class="field"><label for="wpPass">Mật khẩu</label><input id="wpPass" value="${h(randomPass())}" required minlength="8"></div>
         <div class="field"><label for="wpEmail">Email</label><input id="wpEmail" type="email" value="admin@example.com" required></div>
       </div>
-      <p class="sub">EzPanel tự tạo tên miền .test và khởi động lại Apache. Hãy lưu lại mật khẩu quản trị.</p>
+      <p class="sub">Sitebench tự tạo tên miền .test và khởi động lại Apache. Hãy lưu lại mật khẩu quản trị.</p>
       <button class="btn primary">Cài WordPress</button>
     </form>
     <div id="wpJob"></div>`);
@@ -1160,7 +1160,7 @@ async function openTemplates(onChange) {
   onChange?.(templates);
   const dlg = modal('Template cho site WordPress mới', `
     <p class="sub" style="margin-top:0">Template là giao diện (theme), plugin hoặc cả thư mục wp-content mà bạn hay dùng để bắt đầu dự án, ví dụ một starter theme dùng Vite.
-      Nguồn có thể là thư mục trên máy, tệp .zip hoặc địa chỉ Git. Khi cài site, EzPanel chép template vào, chạy npm install / composer install và kích hoạt.</p>
+      Nguồn có thể là thư mục trên máy, tệp .zip hoặc địa chỉ Git. Khi cài site, Sitebench chép template vào, chạy npm install / composer install và kích hoạt.</p>
     <div class="table-wrap">${templates.length ? `<table><tbody>${templates.map(t => `
       <tr data-id="${h(t.id)}"><td><div class="site-name">${h(t.name)}</div><div class="sub log-path">${h(t.source)}</div>
         <div class="sub">${t.install === false ? 'Không tự cài thư viện' : 'Tự chạy npm install / composer install'}</div></td>
@@ -1182,7 +1182,7 @@ async function openTemplates(onChange) {
     if (!r) { box.innerHTML = ''; return; }
     box.innerHTML = r.type === 'site'
       ? `<div class="warn-line" style="border-color:var(--on)">Nhận ra: <b>${h(r.label)}</b>${r.manifest ? ' (theo tpanel.json)' : ''}, chép chồng lên gốc site.${r.nodeRange ? ` Cần Node ${h(r.nodeRange)}.` : ''}
-          ${r.steps?.length ? `<br>Khi tạo dự án, EzPanel sẽ: ${r.steps.map(h).join('; ')}.` : ''}</div>`
+          ${r.steps?.length ? `<br>Khi tạo dự án, Sitebench sẽ: ${r.steps.map(h).join('; ')}.` : ''}</div>`
       : `<p class="warn-line" style="border-color:var(--on)">Nhận ra: ${r.type === 'theme' ? `giao diện <b>${h(r.label)}</b>` : r.type === 'plugin' ? `plugin <b>${h(r.label)}</b>` : 'thư mục wp-content'}
       ${r.nested ? ` (trong ${h(r.nested)})` : ''} · ${[r.vite && 'Vite', r.npm && 'npm', r.composer && 'Composer'].filter(Boolean).join(', ') || 'không có công cụ build'}</p>`;
   };
@@ -1408,7 +1408,7 @@ async function loadWpExtras(name) {
     <form class="row" id="wpCoreVer" style="margin-bottom:.4rem">
       <div class="field" style="width:10rem"><label for="coreVer">Phiên bản (nâng hoặc hạ)</label><input id="coreVer" list="coreVerList" required placeholder="ví dụ 6.4.5"><datalist id="coreVerList"></datalist></div>
       <button class="btn">Đổi phiên bản</button>
-      <span class="sub grow">EzPanel tự sao lưu site trước khi đổi.</span>
+      <span class="sub grow">Sitebench tự sao lưu site trước khi đổi.</span>
     </form>
     <div id="coreCompat" class="compat" style="margin-bottom:1.25rem"></div>
     <h2>Plugin</h2>
@@ -1416,7 +1416,7 @@ async function loadWpExtras(name) {
     <h2>Đặt lại mật khẩu admin</h2>
     <form class="row" id="wpPw">
       <div class="field"><label for="pwUser">Tài khoản</label><select id="pwUser">${x.admins.map(a => `<option value="${h(a.user_login)}">${h(a.user_login)} (${h(a.user_email)})</option>`).join('')}</select></div>
-      <div class="field grow"><label for="pwVal">Mật khẩu mới (EzPanel tạo ngẫu nhiên, sửa được; chỉ có hiệu lực khi bấm Đặt mật khẩu)</label>
+      <div class="field grow"><label for="pwVal">Mật khẩu mới (Sitebench tạo ngẫu nhiên, sửa được; chỉ có hiệu lực khi bấm Đặt mật khẩu)</label>
         <div class="pick-wrap"><input id="pwVal" value="${h(randomPass())}" minlength="8" required><button type="button" class="btn small" id="pwCopy">Sao chép</button></div></div>
       <button class="btn primary">Đặt mật khẩu</button>
     </form>
@@ -1430,7 +1430,7 @@ async function loadWpExtras(name) {
   $('#wpCoreVer').addEventListener('submit', async e => {
     e.preventDefault();
     const version = $('#coreVer').value.trim();
-    if (!confirm(`Đổi ${name} sang WordPress ${version}? EzPanel sẽ sao lưu trước, có thể mất vài phút.`)) return;
+    if (!confirm(`Đổi ${name} sang WordPress ${version}? Sitebench sẽ sao lưu trước, có thể mất vài phút.`)) return;
     e.submitter.textContent = 'Đang sao lưu và đổi phiên bản…';
     const r = await act(e.submitter, () => api(`/api/wp/${enc}/core-version`, { method: 'POST', body: { version } }), `Đã chuyển sang WordPress ${version}.`);
     e.submitter.textContent = 'Đổi phiên bản';
@@ -1504,9 +1504,9 @@ async function openPhpSettings(folder) {
     <form id="phpForm"><div class="settings-grid">${d.settings.map(field).join('')}</div>
       <p><button class="btn primary">Lưu cài đặt</button> ${d.hasBackup ? '<button class="btn" type="button" id="phpRestore">Khôi phục php.ini gốc</button>' : ''}</p></form>
     <h2>Xdebug</h2>
-    <p class="sub" style="margin-top:-.4rem">${xd.other ? 'php.ini đã có cấu hình Xdebug khác (không do EzPanel thêm).' : xd.enabled
+    <p class="sub" style="margin-top:-.4rem">${xd.other ? 'php.ini đã có cấu hình Xdebug khác (không do Sitebench thêm).' : xd.enabled
       ? `<span class="led on"></span> Đang bật, chế độ ${h(xd.mode || 'debug')}. Chỉ hoạt động khi bạn bật trong tiện ích trình duyệt "Xdebug Helper", nên bình thường không làm chậm site.`
-      : 'Đang tắt. Bật lên, EzPanel tự tải đúng bản Xdebug cho phiên bản PHP này.'}</p>
+      : 'Đang tắt. Bật lên, Sitebench tự tải đúng bản Xdebug cho phiên bản PHP này.'}</p>
     <div class="row">
       <div class="field"><label for="xdMode">Chế độ</label><select id="xdMode">
         <option value="debug">Gỡ lỗi từng bước (debug)</option>
@@ -1515,7 +1515,7 @@ async function openPhpSettings(folder) {
       <button class="btn ${xd.enabled ? '' : 'primary'}" id="xdToggle" ${xd.other ? 'disabled' : ''}>${xd.enabled ? 'Tắt Xdebug' : 'Bật Xdebug'}</button>
       ${xd.enabled && xd.managed ? '<button class="btn" id="xdApply">Đổi chế độ</button>' : ''}
     </div>
-    <p class="sub">Dùng với VS Code: cài tiện ích "PHP Debug", cổng 9003, rồi bật "Xdebug Helper" trên trình duyệt. File kết quả đo hiệu năng nằm trong thư mục logs/xdebug của EzPanel.</p>
+    <p class="sub">Dùng với VS Code: cài tiện ích "PHP Debug", cổng 9003, rồi bật "Xdebug Helper" trên trình duyệt. File kết quả đo hiệu năng nằm trong thư mục logs/xdebug của Sitebench.</p>
     <h2>Extension</h2>
     ${d.extensions.length ? `<div class="ext-grid">${d.extensions.map(e => `<label class="switch small"><input type="checkbox" data-ext="${h(e.name)}" ${e.enabled ? 'checked' : ''}> <span>${h(e.name)}</span></label>`).join('')}</div>`
       : '<p class="muted">Không tìm thấy thư mục ext của phiên bản PHP này.</p>'}`);
@@ -1531,7 +1531,7 @@ async function openPhpSettings(folder) {
     if (r) { reportPhp(r, 'Đã lưu cài đặt PHP.'); again(); }
   });
   $('#phpRestore', dlg)?.addEventListener('click', async e => {
-    if (!confirm('Trả php.ini về bản trước khi EzPanel sửa lần đầu?')) return;
+    if (!confirm('Trả php.ini về bản trước khi Sitebench sửa lần đầu?')) return;
     const r = await act(e.target, () => api(`/api/php/${enc}/restore`, { method: 'POST' }));
     if (r) { reportPhp(r, 'Đã khôi phục php.ini gốc.'); again(); }
   });
@@ -1761,7 +1761,7 @@ async function renderImport() {
     lg.versions.map(v => `<option value="${h(v.id)}" ${sel === v.id ? 'selected' : ''}>PHP ${h(v.version)}</option>`).join('');
   view.innerHTML = `
     <h1>Nhập site</h1>
-    <p class="lead">Đưa site về máy để code: kéo từ host (tệp sao lưu hoặc SSH) hay chuyển từ Laragon. EzPanel tự lo database, đổi tên miền thật thành ten.test, chặn email thật và chạy site. Hỗ trợ WordPress, Laravel và website PHP.</p>
+    <p class="lead">Đưa site về máy để code: kéo từ host (tệp sao lưu hoặc SSH) hay chuyển từ Laragon. Sitebench tự lo database, đổi tên miền thật thành ten.test, chặn email thật và chạy site. Hỗ trợ WordPress, Laravel và website PHP.</p>
     <div class="seg" role="tablist">
       <button data-mode="files" class="${importState.mode === 'files' ? 'active' : ''}">Từ tệp sao lưu</button>
       <button data-mode="ssh" class="${importState.mode === 'ssh' ? 'active' : ''}">Qua SSH</button>
@@ -1869,7 +1869,7 @@ function renderImportSsh(phpOpts, lg) {
         <div class="field grow"><label for="sPath">Thư mục website trên host</label><input id="sPath" name="rpath" value="~/public_html"></div>
         <button class="btn primary">Kiểm tra kết nối</button>
       </div>
-      <p class="sub" style="margin-bottom:0">Thông tin đăng nhập chỉ dùng cho lần nhập này, EzPanel không lưu lại.</p>
+      <p class="sub" style="margin-bottom:0">Thông tin đăng nhập chỉ dùng cho lần nhập này, Sitebench không lưu lại.</p>
     </form>
     <div id="probeBox"></div>`;
   const f = $('#impSsh');
@@ -1936,14 +1936,14 @@ function showImportResult(r, out) {
 async function renderImportLaragon() {
   const body = $('#impBody');
   if (runtimeInfo?.mode !== 'standalone') {
-    body.innerHTML = `<div class="notice">Mục này dùng khi EzPanel <b>tự quản lý máy chủ</b>: chuyển toàn bộ dự án và database từ Laragon sang. Hiện EzPanel đang dùng chính Laragon nên không cần chuyển.</div>`;
+    body.innerHTML = `<div class="notice">Mục này dùng khi Sitebench <b>tự quản lý máy chủ</b>: chuyển toàn bộ dự án và database từ Laragon sang. Hiện Sitebench đang dùng chính Laragon nên không cần chuyển.</div>`;
     return;
   }
   const st = await fetch('/api/setup/status').then(r => r.json()).catch(() => ({ laragon: [] }));
   body.innerHTML = `
     <form class="panel" id="migScan">
       <h2>Chuyển từ Laragon</h2>
-      <p class="sub" style="margin-top:-.3rem">Chép mã nguồn và database từ Laragon sang EzPanel, giữ nguyên tên miền .test, phiên bản PHP, HTTPS và chứng chỉ. Laragon không bị thay đổi.</p>
+      <p class="sub" style="margin-top:-.3rem">Chép mã nguồn và database từ Laragon sang Sitebench, giữ nguyên tên miền .test, phiên bản PHP, HTTPS và chứng chỉ. Laragon không bị thay đổi.</p>
       <div class="row">
         <div class="field grow"><label for="migRoot">Thư mục Laragon</label><input id="migRoot" list="migRoots" required value="${h(st.laragon[0] || '')}" placeholder="D:\\laragon">
           <datalist id="migRoots">${st.laragon.map(x => `<option value="${h(x)}">`).join('')}</datalist></div>
@@ -1966,7 +1966,7 @@ function showMigPlan(p) {
   const box = $('#migPlan');
   box.innerHTML = `
     <form class="panel" id="migGo">
-      ${p.laragonRunning ? `<div class="warn-line">Apache/MySQL của Laragon đang chạy. EzPanel sẽ tắt chúng trước khi chuyển (dùng chung cổng 80/3306). Nên thoát hẳn Laragon.</div>` : ''}
+      ${p.laragonRunning ? `<div class="warn-line">Apache/MySQL của Laragon đang chạy. Sitebench sẽ tắt chúng trước khi chuyển (dùng chung cổng 80/3306). Nên thoát hẳn Laragon.</div>` : ''}
       <dl class="facts" style="margin-bottom:1rem">
         <dt>MySQL của Laragon</dt><dd>${h(p.mysql?.name || 'không tìm thấy')}${p.mysql?.datadir ? ` <span class="sub">(dữ liệu: ${h(p.mysql.datadir)})</span>` : ''}</dd>
         <dt>PHP mặc định</dt><dd>${h(p.defaultPhp || '—')} <span class="sub">· có ${p.phps.length} bản: ${p.phps.map(x => h(x.version)).join(', ')}</span></dd>
@@ -1977,7 +1977,7 @@ function showMigPlan(p) {
       <div class="table-wrap" style="margin:.5rem 0 1.2rem"><table><tbody>
         ${p.projects.map(x => `<tr><td style="width:2rem"><input type="checkbox" data-p="${h(x.name)}" ${x.exists ? 'disabled' : 'checked'} aria-label="Chọn ${h(x.name)}"></td>
           <td><b>${h(x.name)}</b> <span class="tag">${h(kind[x.kind] || x.kind)}</span>${x.php ? `<span class="tag">PHP ${h(x.php)}</span>` : ''}${x.https ? '<span class="tag">HTTPS</span>' : ''}${x.lan ? '<span class="tag">Wi-Fi</span>' : ''}
-            <div class="sub">${x.db ? `database ${h(x.db)}` : 'không có database'}${x.exists ? ' · <b>đã có trong EzPanel, bỏ qua</b>' : ''}</div></td></tr>`).join('')}
+            <div class="sub">${x.db ? `database ${h(x.db)}` : 'không có database'}${x.exists ? ' · <b>đã có trong Sitebench, bỏ qua</b>' : ''}</div></td></tr>`).join('')}
       </tbody></table></div>
       <div class="row" style="justify-content:space-between"><h2 style="margin:0">Database (${p.databases.length})</h2>
         <label class="switch small"><input type="checkbox" id="migAllD" checked> <span>Chọn tất cả</span></label></div>
@@ -1989,7 +1989,7 @@ function showMigPlan(p) {
       </div>
       <div class="row" style="margin-top:1rem">
         <div class="field"><label for="migPw">Mật khẩu root MySQL của Laragon</label><input id="migPw" type="password" placeholder="(Laragon mặc định để trống)" autocomplete="off"></div>
-        <button class="btn primary" style="align-self:end">${ic('rocket')} Chuyển sang EzPanel</button>
+        <button class="btn primary" style="align-self:end">${ic('rocket')} Chuyển sang Sitebench</button>
       </div>
     </form>
     <div id="migJob"></div>`;
@@ -2034,11 +2034,11 @@ async function renderMail() {
         ${m.installed ? '<button class="btn" data-m="install" title="Tải bản Mailpit mới nhất">Cập nhật</button>' : ''}
       </div>
       ${m.installed ? `<div class="toggles" style="margin-top:1rem">
-        <label class="switch"><input type="checkbox" id="mAuto" ${m.autoStart ? 'checked' : ''}> <span>Tự bật Mailpit khi mở EzPanel</span></label>
+        <label class="switch"><input type="checkbox" id="mAuto" ${m.autoStart ? 'checked' : ''}> <span>Tự bật Mailpit khi mở Sitebench</span></label>
         <label class="switch"><input type="checkbox" id="mCatch" ${m.catchPhp ? 'checked' : ''}> <span>Chuyển email gửi bằng hàm mail() của PHP vào Mailpit (mọi dự án, mọi phiên bản PHP)</span></label>
       </div>
-      <p class="sub" style="margin:.75rem 0 0">Laravel và ứng dụng dùng SMTP: đặt máy chủ 127.0.0.1, cổng ${h(m.smtp.split(':')[1])}, không mã hóa (site nhập bằng EzPanel đã được đặt sẵn).
-        WordPress cài mới, nhân bản hoặc nhập bằng EzPanel có sẵn plugin ép email vào Mailpit, kể cả khi site đang cấu hình SMTP thật.</p>` : ''}
+      <p class="sub" style="margin:.75rem 0 0">Laravel và ứng dụng dùng SMTP: đặt máy chủ 127.0.0.1, cổng ${h(m.smtp.split(':')[1])}, không mã hóa (site nhập bằng Sitebench đã được đặt sẵn).
+        WordPress cài mới, nhân bản hoặc nhập bằng Sitebench có sẵn plugin ép email vào Mailpit, kể cả khi site đang cấu hình SMTP thật.</p>` : ''}
     </div>
     ${m.running ? `<iframe class="mail-frame" src="${h(m.uiUrl)}" title="Hộp thư Mailpit"></iframe>` : ''}`;
   view.querySelectorAll('[data-m]').forEach(b => b.onclick = async () => {
@@ -2155,7 +2155,7 @@ function loadTermAssets() {
     const el = document.createElement('script');
     el.src = src;
     el.onload = resolve;
-    el.onerror = () => reject(new Error(`Không tải được ${src}. Hãy cài lại EzPanel để cài thư viện terminal.`));
+    el.onerror = () => reject(new Error(`Không tải được ${src}. Hãy cài lại Sitebench để cài thư viện terminal.`));
     document.head.append(el);
   });
   termState.assets = script('/vendor/xterm/lib/xterm.js').then(() => script('/vendor/xterm-fit/lib/addon-fit.js'))
@@ -2338,7 +2338,7 @@ function closeTerm(s) {
   }
 }
 
-// ================= Giao diện EzPanel 2: icon, tiêu đề trang =================
+// ================= Giao diện Sitebench 2: icon, tiêu đề trang =================
 const ic = (name, cls = '') => `<svg class="ic ${cls}" aria-hidden="true"><use href="icons.svg#i-${name}"/></svg>`;
 const VIEW_ICONS = { overview: 'layout-dashboard', laragon: 'server', wp: 'newspaper', import: 'download-cloud', backups: 'archive', db: 'database',
   mail: 'mail', logs: 'scroll-text', terminal: 'terminal-square', files: 'folder-tree', sites: 'globe', services: 'cog', settings: 'settings' };
@@ -2388,7 +2388,7 @@ async function renderOverview() {
   view.innerHTML = `
     <section class="dash-hero">
       <h1>Xin chào!</h1>
-      <p>${standalone ? 'EzPanel đang tự quản lý máy chủ' : lg?.detected ? 'EzPanel đang dùng máy chủ của Laragon' : 'Chưa kết nối máy chủ'} trên <b>${h(o.hostname)}</b> · bật được ${fmtUptime(o.uptime)}</p>
+      <p>${standalone ? 'Sitebench đang tự quản lý máy chủ' : lg?.detected ? 'Sitebench đang dùng máy chủ của Laragon' : 'Chưa kết nối máy chủ'} trên <b>${h(o.hostname)}</b> · bật được ${fmtUptime(o.uptime)}</p>
       <div class="hero-tags">
         <span>${projects.length} dự án</span>
         <span>${projects.filter(p => p.wordpress).length} site WordPress</span>
@@ -2461,7 +2461,7 @@ async function showSetup(status) {
     const steps = st.mode === 'standalone' ? 4 : 3;
     box.innerHTML = `
       <div class="wizard">
-        <div class="wizard-head"><img src="logo.png" alt="" width="56" height="56"><div><h1>Chào mừng đến với EzPanel</h1><p>Thiết lập một lần, chỉ mất vài phút.</p></div></div>
+        <div class="wizard-head"><img src="logo.png" alt="" width="56" height="56"><div><h1>Chào mừng đến với Sitebench</h1><p>Thiết lập một lần, chỉ mất vài phút.</p></div></div>
         <div class="steps">${Array.from({ length: steps }, (_, i) => `<span class="${i < st.step ? 'done' : ''}"></span>`).join('')}</div>
         <div class="wizard-body" id="wzBody"></div>
       </div>`;
@@ -2469,7 +2469,7 @@ async function showSetup(status) {
     if (st.step === 1) {
       body.innerHTML = `
         <h2>Đặt mật khẩu đăng nhập</h2>
-        <p class="muted">Dùng để mở bảng điều khiển EzPanel trên máy này.</p>
+        <p class="muted">Dùng để mở bảng điều khiển Sitebench trên máy này.</p>
         <form id="wz1" class="settings-grid">
           <div class="field"><label for="wzPw">Mật khẩu (ít nhất 8 ký tự)</label><input id="wzPw" type="password" minlength="8" required autofocus autocomplete="new-password" value="${h(st.password)}"></div>
           <div class="field"><label for="wzPw2">Nhập lại mật khẩu</label><input id="wzPw2" type="password" minlength="8" required autocomplete="new-password" value="${h(st.password)}"></div>
@@ -2485,10 +2485,10 @@ async function showSetup(status) {
     } else if (st.step === 2) {
       body.innerHTML = `
         <h2>Chọn cách chạy máy chủ</h2>
-        <p class="muted">Có thể đổi sau trong EzPanel.</p>
+        <p class="muted">Có thể đổi sau trong Sitebench.</p>
         <label class="choice"><input type="radio" name="mode" value="standalone" ${st.mode === 'standalone' ? 'checked' : ''}>
-          <span><b>EzPanel tự quản lý máy chủ <span class="tag">Khuyên dùng</span></b>
-          <p>Không cần Laragon. EzPanel tự tải Apache, PHP, MySQL bản chính thức và chạy PHP qua FastCGI giống PHP-FPM trên hosting.</p></span></label>
+          <span><b>Sitebench tự quản lý máy chủ <span class="tag">Khuyên dùng</span></b>
+          <p>Không cần Laragon. Sitebench tự tải Apache, PHP, MySQL bản chính thức và chạy PHP qua FastCGI giống PHP-FPM trên hosting.</p></span></label>
         <label class="choice"><input type="radio" name="mode" value="laragon" ${st.mode === 'laragon' ? 'checked' : ''}>
           <span><b>Dùng Laragon đã cài trên máy</b>
           <p>${status.laragon.length ? `Tìm thấy Laragon tại ${status.laragon.map(h).join(', ')}.` : 'Không tìm thấy Laragon trên các ổ đĩa; bạn có thể nhập đường dẫn.'}</p>
@@ -2505,8 +2505,8 @@ async function showSetup(status) {
       };
     } else if (st.step === 3 && st.mode === 'laragon') {
       body.innerHTML = `<h2>${ic('circle-check')} Đã kết nối Laragon</h2>
-        <p class="muted">EzPanel dùng Apache, PHP, MySQL của Laragon tại <b>${h(st.laragonRoot)}</b>. Bạn có thể bật Apache và MySQL ngay trong EzPanel.</p>
-        <div class="wizard-actions"><span></span><button class="btn primary" id="wzDone">Vào EzPanel ${ic('arrow-right')}</button></div>`;
+        <p class="muted">Sitebench dùng Apache, PHP, MySQL của Laragon tại <b>${h(st.laragonRoot)}</b>. Bạn có thể bật Apache và MySQL ngay trong Sitebench.</p>
+        <div class="wizard-actions"><span></span><button class="btn primary" id="wzDone">Vào Sitebench ${ic('arrow-right')}</button></div>`;
       $('#wzDone').onclick = () => { box.hidden = true; location.hash = '#overview'; enterApp(); };
     } else if (st.step === 3) {
       body.innerHTML = `
@@ -2521,7 +2521,7 @@ async function showSetup(status) {
             ? `<label for="wzDbv">Phiên bản MySQL</label><input id="wzDbv" value="${h(st.dbVersion)}" pattern="\\d+\\.\\d+\\.\\d+" required>`
             : `<label for="wzDbv">Phiên bản MariaDB</label><select id="wzDbv">${['11.4', '10.11', '10.6'].map(v => `<option ${v === st.mariadb ? 'selected' : ''}>${v}</option>`).join('')}</select>`}</div>
         </div>
-        <p class="sub">EzPanel sẽ tải Apache (Apache Lounge), PHP (windows.php.net) và ${st.dbType === 'mysql' ? 'MySQL (dev.mysql.com, khoảng 300 MB)' : 'MariaDB (mariadb.org)'}: mất vài phút tùy tốc độ mạng. Windows có thể hỏi quyền admin để cài Visual C++.</p></form>
+        <p class="sub">Sitebench sẽ tải Apache (Apache Lounge), PHP (windows.php.net) và ${st.dbType === 'mysql' ? 'MySQL (dev.mysql.com, khoảng 300 MB)' : 'MariaDB (mariadb.org)'}: mất vài phút tùy tốc độ mạng. Windows có thể hỏi quyền admin để cài Visual C++.</p></form>
         <div class="wizard-actions"><button class="btn" id="wzBack">Quay lại</button><button class="btn primary" form="wz3">${ic('rocket')} Dựng máy chủ</button></div>`;
       $('#wzDb').onchange = e => { st.dbType = e.target.value; st.root = $('#wzRoot').value; st.php = $('#wzPhp').value; draw(); };
       $('#wzBack').onclick = () => { st.step = 2; draw(); };
@@ -2540,7 +2540,7 @@ async function showSetup(status) {
       watchJob(st.job, $('#wzJob'), (res, out) => {
         out.innerHTML = `<p><b>${ic('circle-check')} Máy chủ đã sẵn sàng.</b> Apache ${h(res.apache)}, ${h(res.php)}, ${h(res.db)} tại ${h(res.root)}.</p>
           <p class="sub">${h(res.message || '')}</p>
-          <button class="btn primary" id="wzDone">Vào EzPanel ${ic('arrow-right')}</button>`;
+          <button class="btn primary" id="wzDone">Vào Sitebench ${ic('arrow-right')}</button>`;
         $('#wzDone').onclick = () => { box.hidden = true; location.hash = '#overview'; enterApp(); };
       });
       // Lỗi giữa chừng: cho quay lại sửa cấu hình
@@ -2578,8 +2578,8 @@ async function renderSettings() {
     <section class="panel" id="stMode">
       <h2>Chế độ máy chủ</h2>
       <label class="choice"><input type="radio" name="stmode" value="standalone" ${standalone ? 'checked' : ''}>
-        <span><b>EzPanel tự quản lý máy chủ ${standalone ? '<span class="tag">Đang dùng</span>' : ''}</b>
-        <p>${s.standaloneReady ? `Máy chủ tại <b>${h(s.roots.standalone)}</b>.` : 'Chưa dựng: chọn thư mục và phiên bản bên dưới, EzPanel sẽ tải và cài đặt.'}</p></span></label>
+        <span><b>Sitebench tự quản lý máy chủ ${standalone ? '<span class="tag">Đang dùng</span>' : ''}</b>
+        <p>${s.standaloneReady ? `Máy chủ tại <b>${h(s.roots.standalone)}</b>.` : 'Chưa dựng: chọn thư mục và phiên bản bên dưới, Sitebench sẽ tải và cài đặt.'}</p></span></label>
       <label class="choice"><input type="radio" name="stmode" value="laragon" ${standalone ? '' : 'checked'}>
         <span><b>Dùng Laragon đã cài ${standalone ? '' : '<span class="tag">Đang dùng</span>'}</b>
         <p>${lgRoots.length ? `Laragon tại ${lgRoots.map(h).join(', ')}.` : 'Không tìm thấy Laragon trên các ổ đĩa.'}</p></span></label>
@@ -2598,10 +2598,10 @@ async function renderSettings() {
         <div class="field"><label for="stDb">MySQL</label><input id="stDb" type="number" min="1" max="65535" value="${s.mysqlPort}"></div>
         <div class="field" style="align-self:end"><button class="btn primary">Lưu cổng máy chủ</button></div>
       </form>
-      <p class="sub">${standalone ? 'EzPanel tự sửa httpd.conf, my.ini, virtual host của mọi dự án và khởi động lại Apache/MySQL.' : 'Đang dùng Laragon: hãy đổi cổng tương ứng trong Laragon cho khớp.'} Đổi cổng 80 thì địa chỉ site có dạng http://ten.test:cổng.</p>
-      <form id="sEzPanel" class="row" style="margin-top:.8rem">
-        <div class="field"><label for="sEzPanelPort">Cổng của bảng điều khiển EzPanel</label><input id="sEzPanelPort" type="number" min="1024" max="65535" value="${s.panelPort}"></div>
-        <button class="btn" style="align-self:end">Đổi cổng EzPanel</button>
+      <p class="sub">${standalone ? 'Sitebench tự sửa httpd.conf, my.ini, virtual host của mọi dự án và khởi động lại Apache/MySQL.' : 'Đang dùng Laragon: hãy đổi cổng tương ứng trong Laragon cho khớp.'} Đổi cổng 80 thì địa chỉ site có dạng http://ten.test:cổng.</p>
+      <form id="sSitebench" class="row" style="margin-top:.8rem">
+        <div class="field"><label for="sSitebenchPort">Cổng của bảng điều khiển Sitebench</label><input id="sSitebenchPort" type="number" min="1024" max="65535" value="${s.panelPort}"></div>
+        <button class="btn" style="align-self:end">Đổi cổng Sitebench</button>
       </form>
     </section>
 
@@ -2619,12 +2619,12 @@ async function renderSettings() {
     <section class="panel">
       <h2>Thông tin</h2>
       <dl class="facts">
-        <dt>Phiên bản EzPanel</dt><dd>${h(s.version)}</dd>
+        <dt>Phiên bản Sitebench</dt><dd>${h(s.version)}</dd>
         <dt>Thư mục ứng dụng</dt><dd>${h(s.appDir)}</dd>
         <dt>Thư mục máy chủ</dt><dd>${h(s.root)}</dd>
         <dt>Bảng điều khiển</dt><dd>http://localhost:${s.panelPort}</dd>
       </dl>
-      ${s.tray ? `<p style="margin-bottom:0"><button class="btn" id="stRestart">${ic('rotate-cw')} Khởi động lại EzPanel</button></p>` : ''}
+      ${s.tray ? `<p style="margin-bottom:0"><button class="btn" id="stRestart">${ic('rotate-cw')} Khởi động lại Sitebench</button></p>` : ''}
     </section>`;
 
   // ----- Chế độ máy chủ -----
@@ -2636,16 +2636,16 @@ async function renderSettings() {
       box.innerHTML = `<div class="row"><div class="field grow"><label for="stLg">Thư mục Laragon</label>
         <input id="stLg" list="stLgList" value="${h(lgRoots[0] || '')}" placeholder="D:\\laragon"><datalist id="stLgList">${lgRoots.map(x => `<option value="${h(x)}">`).join('')}</datalist></div>
         <button class="btn primary" id="stGo" style="align-self:end">Chuyển sang Laragon</button></div>
-        <p class="sub">EzPanel tắt Apache/MySQL của máy chủ độc lập (dữ liệu được giữ nguyên, chuyển lại được bất cứ lúc nào).</p>`;
+        <p class="sub">Sitebench tắt Apache/MySQL của máy chủ độc lập (dữ liệu được giữ nguyên, chuyển lại được bất cứ lúc nào).</p>`;
     } else if (s.standaloneReady) {
-      box.innerHTML = `<p class="sub">EzPanel tắt Apache/MySQL của Laragon rồi bật máy chủ tại ${h(s.roots.standalone)}.</p><button class="btn primary" id="stGo">Chuyển sang máy chủ độc lập</button>`;
+      box.innerHTML = `<p class="sub">Sitebench tắt Apache/MySQL của Laragon rồi bật máy chủ tại ${h(s.roots.standalone)}.</p><button class="btn primary" id="stGo">Chuyển sang máy chủ độc lập</button>`;
     } else {
       box.innerHTML = `<div class="settings-grid">
-        <div class="field" style="grid-column:1/-1"><label for="stRoot">Thư mục máy chủ</label><input id="stRoot" value="${h(s.roots.standalone || '')}" placeholder="D:\\EzPanel"></div>
+        <div class="field" style="grid-column:1/-1"><label for="stRoot">Thư mục máy chủ</label><input id="stRoot" value="${h(s.roots.standalone || '')}" placeholder="D:\\Sitebench"></div>
         <div class="field"><label for="stPhp">PHP</label><select id="stPhp">${['8.4', '8.3', '8.2', '8.1', '8.0', '7.4'].map(v => `<option>${v}</option>`).join('')}</select></div>
         <div class="field"><label for="stDbType">Database</label><select id="stDbType"><option value="mysql">MySQL</option><option value="mariadb">MariaDB</option></select></div>
         <div class="field"><label for="stDbVer">Phiên bản (MySQL: ví dụ 8.0.46 · MariaDB: 11.4, 10.11)</label><input id="stDbVer" value="8.0.46"></div>
-      </div><p class="sub">EzPanel tải Apache, PHP, database bản chính thức rồi dựng máy chủ. Sau đó dùng Nhập site → Từ Laragon để chuyển dự án sang.</p>
+      </div><p class="sub">Sitebench tải Apache, PHP, database bản chính thức rồi dựng máy chủ. Sau đó dùng Nhập site → Từ Laragon để chuyển dự án sang.</p>
       <button class="btn primary" id="stGo">${ic('rocket')} Dựng máy chủ độc lập</button>`;
       $('#stDbType').onchange = e => { $('#stDbVer').value = e.target.value === 'mysql' ? '8.0.46' : '11.4'; };
     }
@@ -2729,17 +2729,17 @@ async function renderSettings() {
     for (const n of r?.notes || []) toast(n);
     if (r) refreshLeds();
   });
-  $('#sEzPanel').addEventListener('submit', async e => {
+  $('#sSitebench').addEventListener('submit', async e => {
     e.preventDefault();
-    const r = await act(e.submitter, () => api('/api/settings/panel-port', { method: 'POST', body: { port: Number($('#sEzPanelPort').value) } }));
+    const r = await act(e.submitter, () => api('/api/settings/panel-port', { method: 'POST', body: { port: Number($('#sSitebenchPort').value) } }));
     if (!r) return;
-    if (!r.restarting) { toast(`Đã lưu. Khởi động lại EzPanel rồi mở ${r.url}`); return; }
-    toast(`Đang khởi động lại EzPanel ở ${r.url}…`);
+    if (!r.restarting) { toast(`Đã lưu. Khởi động lại Sitebench rồi mở ${r.url}`); return; }
+    toast(`Đang khởi động lại Sitebench ở ${r.url}…`);
     waitAndGo(r.url);
   });
   $('#stRestart')?.addEventListener('click', async e => {
     const r = await act(e.target, () => api('/api/settings/restart', { method: 'POST' }));
-    if (r?.restarting) { toast('Đang khởi động lại EzPanel…'); waitAndGo(location.origin + '/'); }
+    if (r?.restarting) { toast('Đang khởi động lại Sitebench…'); waitAndGo(location.origin + '/'); }
   });
   loadDesktop();
   loadUpdatesPanel().catch(err => { $('#stUpd').innerHTML = `<h2>Cập nhật</h2><p class="error">${h(err.message)}</p>`; });
@@ -2750,7 +2750,7 @@ async function renderSettings() {
   });
 }
 
-// ----- Cài đặt → Cập nhật (EzPanel và phần mềm đi kèm) -----
+// ----- Cài đặt → Cập nhật (Sitebench và phần mềm đi kèm) -----
 async function loadUpdatesPanel() {
   const box = $('#stUpd');
   if (!box) return;
@@ -2759,23 +2759,27 @@ async function loadUpdatesPanel() {
   const kindName = { php: 'PHP', apache: 'Apache', mysql: 'Database', 'mysql-series': 'Database (khác dòng)', rollback: 'Quay lại' };
   const tpanelRow = su.desktop ? `
     <div class="upd-row">
-      <div class="grow"><b>EzPanel ${h(su.desktop.version)}</b>
+      <div class="grow"><b>Sitebench ${h(su.desktop.version)}</b>
         <div class="sub" id="dkUpdInfo">${su.repo ? 'Bấm Kiểm tra để tìm bản mới trên GitHub Releases.' : 'Cập nhật bằng tệp bộ cài, hoặc nhập kho GitHub để tự kiểm tra bản mới.'}</div></div>
       ${su.repo ? `<button class="btn small" id="dkCheck">${ic('refresh-cw')} Kiểm tra</button>` : ''}
       <button class="btn small" id="dkFile">${ic('package')} Cập nhật từ tệp bộ cài</button>
     </div>
-    <div id="dkUpd"></div>` : null;
+    <div id="dkUpd"></div>
+    ${su.repo ? `<div class="toggles" style="margin:.6rem 0 .4rem">
+      <label class="switch"><input type="checkbox" id="dkAuto" ${su.autoDownload ? 'checked' : ''}> <span><b>Tự tải bản mới</b> và cài khi thoát Sitebench (Apache/MySQL vẫn chạy trong lúc cài)</span></label>
+      <label class="switch"><input type="checkbox" id="dkPre" ${su.prerelease ? 'checked' : ''}> <span><b>Nhận bản thử nghiệm</b>: chỉ bật trên máy dùng để thử bản mới trước khi phát hành chính thức</span></label>
+    </div>` : ''}` : null;
   box.innerHTML = `
     <h2>Cập nhật</h2>
     ${tpanelRow ? tpanelRow : `<div class="upd-row">
-      <div class="grow"><b>EzPanel ${h(su.version)}</b>
+      <div class="grow"><b>Sitebench ${h(su.version)}</b>
         <div class="sub">${su.latest ? (su.latest.newer ? `Có bản mới <b>${h(su.latest.version)}</b>${su.latest.page ? ` · <a href="${h(su.latest.page)}" target="_blank" rel="noopener">ghi chú phát hành</a>` : ''}` : `Đang dùng bản mới nhất (${h(su.latest.version || su.version)})`) : su.repo ? 'Chưa kiểm tra' : 'Cập nhật bằng tệp zip, hoặc nhập kho GitHub để tự kiểm tra bản mới.'}</div></div>
       ${su.repo ? `<button class="btn small" id="suCheck">${ic('refresh-cw')} Kiểm tra</button>` : ''}
       ${su.latest?.newer ? `<button class="btn small primary" id="suDl">${ic('download-cloud')} Tải ${h(su.latest.version)}</button>` : ''}
       <label class="btn small">${ic('package')} Cập nhật từ tệp zip<input type="file" id="suZip" accept=".zip" hidden></label>
     </div>`}
     ${su.staged ? `<div class="upd-row staged"><div class="grow"><b>Sẵn sàng cập nhật lên ${h(su.staged.version)}</b>
-        <div class="sub">EzPanel sẽ tắt, sao lưu bản hiện tại, chép bản mới (giữ cài đặt và dữ liệu) rồi tự mở lại. Apache/MySQL vẫn chạy.</div></div>
+        <div class="sub">Sitebench sẽ tắt, sao lưu bản hiện tại, chép bản mới (giữ cài đặt và dữ liệu) rồi tự mở lại. Apache/MySQL vẫn chạy.</div></div>
         <button class="btn small primary" id="suApply" ${su.windows ? '' : 'disabled title="Chỉ trên Windows"'}>${ic('rocket')} Cập nhật ngay</button>
         <button class="btn small" id="suDrop">Bỏ</button></div>` : ''}
     ${su.backup ? `<p class="sub">Bản trước (${h(su.backup)}) được giữ để quay lại: <button class="btn small" id="suBack">Quay lại ${h(su.backup)}</button></p>` : ''}
@@ -2783,7 +2787,7 @@ async function loadUpdatesPanel() {
       <form id="suRepo" class="row" style="margin-top:.6rem"><input id="suRepoIn" class="grow" placeholder="${h(su.repoBuiltIn ? `Mặc định của bộ cài: ${su.repoBuiltIn}` : 'chu-so-huu/ezpanel')}" value="${h(su.repoCustom || '')}">
         <button class="btn small">Lưu</button></form>
       ${su.repo ? `<p class="sub">Đang dùng: <b>${h(su.repo)}</b>${su.repoCustom ? '' : ' (mặc định của bộ cài, không cần nhập)'}. Để trống ô trên rồi Lưu để quay về mặc định.</p>` : ''}
-      <p class="sub">Mỗi bản phát hành cần tệp tpanel-x.y.z.zip (và tpanel-x.y.z.zip.sha256 để kiểm tra mã băm). EzPanel tự kiểm tra mỗi ngày.</p></details>
+      <p class="sub">Mỗi bản phát hành cần tệp tpanel-x.y.z.zip (và tpanel-x.y.z.zip.sha256 để kiểm tra mã băm). Sitebench tự kiểm tra mỗi ngày.</p></details>
     ${up.standalone ? `
       <div class="row" style="justify-content:space-between;align-items:center"><b>Phần mềm đi kèm</b>
         <button class="btn small" id="upCheck">${ic('refresh-cw')} Kiểm tra bản mới</button></div>
@@ -2793,14 +2797,14 @@ async function loadUpdatesPanel() {
           <select id="upSType"><option value="mysql">MySQL</option><option value="mariadb">MariaDB</option></select>
           <input id="upSVer" placeholder="8.4.6" required style="width:8rem">
           <button class="btn small">Nâng cấp</button></form>
-        <p class="sub">EzPanel xuất toàn bộ database, cài bản mới với thư mục dữ liệu mới rồi nạp lại. Dữ liệu cũ được giữ nguyên để quay lại. Chỉ nên nâng cấp khi host cũng đã lên dòng đó.</p></details>
+        <p class="sub">Sitebench xuất toàn bộ database, cài bản mới với thư mục dữ liệu mới rồi nạp lại. Dữ liệu cũ được giữ nguyên để quay lại. Chỉ nên nâng cấp khi host cũng đã lên dòng đó.</p></details>
       ${up.history.length ? `<details style="margin-top:.6rem"><summary class="sub" style="cursor:pointer">Lịch sử cập nhật</summary><ul class="upd-hist">${up.history.map(e => `
         <li><span>${h(kindName[e.kind] || e.kind)}: ${h(e.from)} → ${h(e.to)} <span class="sub">· ${fmtDate(e.at)}</span></span>
         ${e.kind !== 'rollback' ? `<button class="btn small" data-rb="${h(e.id)}">Quay lại ${h(e.from)}</button>` : ''}</li>`).join('')}</ul></details>` : ''}`
       : '<p class="sub">Đang dùng Laragon: phần mềm đi kèm (PHP, Apache, MySQL) do Laragon quản lý.</p>'}
     <div id="updJob"></div>`;
 
-  const job = (r, done) => r && watchJob(r.job, $('#updJob'), (res, out) => { out.innerHTML = `<p><b>${ic('circle-check')} ${h(res.message || `Gói EzPanel ${res.version} đã sẵn sàng.`)}</b></p>`; done?.(); setTimeout(loadUpdatesPanel, 1200); refreshUpdateBadge(); });
+  const job = (r, done) => r && watchJob(r.job, $('#updJob'), (res, out) => { out.innerHTML = `<p><b>${ic('circle-check')} ${h(res.message || `Gói Sitebench ${res.version} đã sẵn sàng.`)}</b></p>`; done?.(); setTimeout(loadUpdatesPanel, 1200); refreshUpdateBadge(); });
   $('#suCheck')?.addEventListener('click', async e => { if (await act(e.target, () => api('/api/selfupdate/check', { method: 'POST' }))) loadUpdatesPanel(); });
   $('#suDl')?.addEventListener('click', async e => job(await act(e.target, () => api('/api/selfupdate/download', { method: 'POST' }))));
   if (su.desktop) bindDesktopUpdate(su);
@@ -2818,12 +2822,12 @@ async function loadUpdatesPanel() {
     } catch (err) { toast(err.message, true); }
   };
   $('#suApply')?.addEventListener('click', async e => {
-    if (!confirm(`Cập nhật EzPanel lên ${su.staged.version}? EzPanel sẽ tắt và mở lại sau khoảng 30 giây.`)) return;
-    if (await act(e.target, () => api('/api/selfupdate/apply', { method: 'POST' }))) { toast('Đang cập nhật, EzPanel sẽ tự mở lại…'); waitAndGo(location.origin + '/#settings'); }
+    if (!confirm(`Cập nhật Sitebench lên ${su.staged.version}? Sitebench sẽ tắt và mở lại sau khoảng 30 giây.`)) return;
+    if (await act(e.target, () => api('/api/selfupdate/apply', { method: 'POST' }))) { toast('Đang cập nhật, Sitebench sẽ tự mở lại…'); waitAndGo(location.origin + '/#settings'); }
   });
   $('#suDrop')?.addEventListener('click', async e => { if (await act(e.target, () => api('/api/selfupdate/staged', { method: 'DELETE' }))) loadUpdatesPanel(); });
   $('#suBack')?.addEventListener('click', async e => {
-    if (!confirm(`Quay lại EzPanel ${su.backup}?`)) return;
+    if (!confirm(`Quay lại Sitebench ${su.backup}?`)) return;
     if (await act(e.target, () => api('/api/selfupdate/rollback', { method: 'POST' }))) { toast('Đang quay lại bản trước…'); waitAndGo(location.origin + '/#settings'); }
   });
   $('#suRepo')?.addEventListener('submit', async e => {
@@ -2834,7 +2838,7 @@ async function loadUpdatesPanel() {
   const bindList = () => box.querySelectorAll('[data-up]').forEach(b => b.onclick = async () => {
     const [kind, from] = b.dataset.up.split('|');
     const item = up.items.find(x => x.kind === kind && x.from === from);
-    const warn = kind === 'mysql' ? '\n\nMySQL sẽ tắt một lúc; EzPanel sao chép thư mục dữ liệu trước để quay lại khi cần.' : '';
+    const warn = kind === 'mysql' ? '\n\nMySQL sẽ tắt một lúc; Sitebench sao chép thư mục dữ liệu trước để quay lại khi cần.' : '';
     if (!confirm(`Cập nhật ${item.label} ${item.current} lên ${item.latest}?${warn}`)) return;
     job(await act(b, () => api('/api/updates/apply', { method: 'POST', body: { kind, from } })));
   });
@@ -2861,7 +2865,7 @@ async function loadUpdatesPanel() {
   });
 }
 function upListHtml(up) {
-  if (!up.at) return '<p class="sub">Chưa kiểm tra. EzPanel tự kiểm tra mỗi ngày, hoặc bấm Kiểm tra bản mới.</p>';
+  if (!up.at) return '<p class="sub">Chưa kiểm tra. Sitebench tự kiểm tra mỗi ngày, hoặc bấm Kiểm tra bản mới.</p>';
   const errs = (up.errors || []).length ? `<p class="sub">Không kiểm tra được: ${up.errors.map(h).join('; ')}</p>` : '';
   if (!up.items.length) return `<p class="sub">${ic('circle-check')} PHP, Apache và database đều là bản mới nhất trong dòng đang dùng (kiểm tra lúc ${fmtDate(up.at)}).</p>${errs}`;
   return `<ul class="upd-hist">${up.items.map(x => `<li><span><b>${h(x.label)}</b> ${h(x.current)} → <b>${h(x.latest)}</b></span>
@@ -2882,24 +2886,45 @@ async function refreshUpdateBadge() {
 // Cập nhật bản desktop: GitHub Releases (electron-updater) hoặc tệp bộ cài
 function bindDesktopUpdate(su) {
   const out = $('#dkUpd');
+  // Trạng thái tự tải ngầm (đang tải / đã tải xong, chờ cài khi thoát)
+  const showState = st => {
+    if (!st || !out) return;
+    if (st.downloaded) {
+      out.innerHTML = `<div class="upd-row staged"><div class="grow"><b>Sitebench ${h(st.downloaded)} đã tải xong</b>
+        <div class="sub">Sẽ được cài khi bạn thoát Sitebench (khay → Thoát Sitebench). Apache/MySQL vẫn chạy.</div></div>
+        <button class="btn small primary" id="dkNow">${ic('rocket')} Cài ngay</button></div>`;
+      $('#dkNow').onclick = () => desk.update.install();
+    } else if (st.available && st.percent != null && st.percent < 100) {
+      out.innerHTML = `<div class="upd-row staged"><div class="grow"><b>Đang tải Sitebench ${h(st.available)}</b><div class="sub">${st.percent}%</div></div></div>`;
+    }
+  };
+  desk.update.state?.().then(showState);
+  desk.update.onState?.(showState);
+  const savePrefs = async (body, msg) => {
+    const r = await act(null, () => api('/api/selfupdate/prefs', { method: 'POST', body }));
+    if (r) { Object.assign(su, r); toast(msg(r)); }
+  };
+  $('#dkAuto')?.addEventListener('change', e => savePrefs({ autoDownload: e.target.checked }, r => (r.autoDownload ? 'Đã bật tự tải bản mới.' : 'Đã tắt tự tải: chỉ báo khi có bản mới.')));
+  $('#dkPre')?.addEventListener('change', e => savePrefs({ prerelease: e.target.checked }, r => (r.prerelease ? 'Máy này sẽ nhận cả bản thử nghiệm.' : 'Máy này chỉ nhận bản chính thức.')));
   $('#dkFile').onclick = async () => {
-    if (!confirm('Chọn tệp EzPanel-Setup-x.y.z.exe. EzPanel sẽ tắt, cài bản mới (giữ cài đặt và dữ liệu) rồi tự mở lại. Apache/MySQL vẫn chạy.')) return;
+    if (!confirm('Chọn tệp Sitebench-Setup-x.y.z.exe. Sitebench sẽ tắt, cài bản mới (giữ cài đặt và dữ liệu) rồi tự mở lại. Apache/MySQL vẫn chạy.')) return;
     try { await desk.update.fromFile(); } catch (e) { toast(e.message, true); }
   };
   $('#dkCheck')?.addEventListener('click', async e => {
     e.target.disabled = true;
     try {
-      const r = await desk.update.check(su.repo);
+      const r = await desk.update.check(su.repo, su.prerelease);
+      if (r.downloaded) { showState({ downloaded: r.downloaded }); e.target.disabled = false; return; }
       $('#dkUpdInfo').innerHTML = r.available ? `Có bản mới <b>${h(r.latest)}</b>` : `Đang dùng bản mới nhất (${h(r.current)})`;
       if (r.available) {
-        out.innerHTML = `<div class="upd-row staged"><div class="grow"><b>EzPanel ${h(r.latest)}</b><div class="sub" id="dkProg">Tải về rồi cài khi bạn bấm.</div></div>
+        out.innerHTML = `<div class="upd-row staged"><div class="grow"><b>Sitebench ${h(r.latest)}</b><div class="sub" id="dkProg">Tải về rồi cài khi bạn bấm.</div></div>
           <button class="btn small primary" id="dkGo">${ic('download-cloud')} Tải và cài</button></div>`;
         $('#dkGo').onclick = async b => {
           b.target.disabled = true;
           desk.update.onProgress(p => { $('#dkProg').textContent = `Đang tải ${p}%`; });
           try {
             await desk.update.download();
-            $('#dkProg').textContent = 'Đã tải xong. EzPanel sẽ tắt, cài bản mới rồi tự mở lại.';
+            $('#dkProg').textContent = 'Đã tải xong. Sitebench sẽ tắt, cài bản mới rồi tự mở lại.';
             setTimeout(() => desk.update.install(), 1200);
           } catch (err) { toast(err.message, true); b.target.disabled = false; }
         };
@@ -2909,7 +2934,7 @@ function bindDesktopUpdate(su) {
   });
 }
 
-// Chờ EzPanel chạy lại rồi mở địa chỉ mới
+// Chờ Sitebench chạy lại rồi mở địa chỉ mới
 function waitAndGo(url) {
   let tries = 0;
   const tick = async () => {

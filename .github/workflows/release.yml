@@ -1,12 +1,16 @@
-# Phát hành EzPanel: vào tab Actions → "Phát hành EzPanel" → Run workflow → nhập số phiên bản (ví dụ 3.0.6).
-# GitHub dựng bộ cài trên Windows rồi đăng lên Releases (kèm latest.yml, .blockmap); EzPanel trên mọi máy tự thấy bản mới.
-name: Phát hành EzPanel
+# Phát hành Sitebench: vào tab Actions → "Phát hành Sitebench" → Run workflow → nhập số phiên bản (ví dụ 3.0.6).
+# GitHub dựng bộ cài trên Windows rồi đăng lên Releases (kèm latest.yml, .blockmap); Sitebench trên mọi máy tự thấy bản mới.
+name: Phát hành Sitebench
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Số phiên bản mới, ví dụ 3.0.6 (phải lớn hơn bản đang dùng)'
+        description: 'Số phiên bản mới, ví dụ 3.0.9 (phải lớn hơn bản đang dùng)'
         required: true
+      prerelease:
+        description: 'Bản thử nghiệm: chỉ máy bật "Nhận bản thử nghiệm" mới nhận. Thử ổn thì trên GitHub sửa bản phát hành, bỏ Pre-release, chọn Set as latest.'
+        type: boolean
+        default: false
   push:
     tags: ['v*']
 permissions:
@@ -33,9 +37,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
           TARGET_REPO: ${{ vars.RELEASE_REPO || github.repository }}
+          PRERELEASE: ${{ github.event.inputs.prerelease || 'false' }}
         run: |
           V=$(node -p "require('./package.json').version")
-          FILES="dist/EzPanel-Setup-$V.exe dist/EzPanel-Setup-$V.exe.blockmap dist/latest.yml"
+          # Bản thử nghiệm: đánh dấu Pre-release, không gắn nhãn Latest (máy thường không nhận)
+          if [ "$PRERELEASE" = "true" ]; then KIND="--prerelease --latest=false"; else KIND="--prerelease=false --latest"; fi
+          FILES="dist/Sitebench-Setup-$V.exe dist/Sitebench-Setup-$V.exe.blockmap dist/latest.yml"
           # Thiếu tệp nào thì dừng, không công bố bản phát hành dở dang
           for f in $FILES; do [ -s "$f" ] || { echo "::error::Thiếu tệp $f"; exit 1; }; done
           ls -la $FILES
@@ -45,8 +52,9 @@ jobs:
           if gh release view "v$V" --repo "$TARGET_REPO" >/dev/null 2>&1; then
             echo "Bản v$V đã có: tải bổ sung / thay các tệp rồi công bố"
             gh release upload "v$V" $FILES --repo "$TARGET_REPO" --clobber
-            gh release edit "v$V" --repo "$TARGET_REPO" --draft=false --latest
+            gh release edit "v$V" --repo "$TARGET_REPO" --draft=false $KIND
           else
-            gh release create "v$V" $FILES --repo "$TARGET_REPO" --title "EzPanel $V" --notes "$NOTES" --latest $TARGET
+            if [ "$PRERELEASE" = "true" ]; then KIND_NEW="--prerelease --latest=false"; else KIND_NEW="--latest"; fi
+            gh release create "v$V" $FILES --repo "$TARGET_REPO" --title "Sitebench $V" --notes "$NOTES" $KIND_NEW $TARGET
           fi
-          echo "Đã đăng: https://github.com/$TARGET_REPO/releases/tag/v$V"
+          echo "Đã đăng$( [ "$PRERELEASE" = "true" ] && echo ' (bản thử nghiệm)'): https://github.com/$TARGET_REPO/releases/tag/v$V"

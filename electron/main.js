@@ -1,4 +1,4 @@
-// EzPanel — tiến trình chính của Electron: cửa sổ, khay hệ thống, chạy phần xử lý (server.js), chạy cùng Windows,
+// Sitebench — tiến trình chính của Electron: cửa sổ, khay hệ thống, chạy phần xử lý (server.js), chạy cùng Windows,
 // hộp thoại chọn thư mục/tệp, cập nhật (GitHub Releases hoặc tệp bộ cài), chuyển dữ liệu từ bản 2.0.x.
 
 const { app, BrowserWindow, Tray, Menu, nativeImage, shell, dialog, ipcMain, utilityProcess, Notification } = require('electron');
@@ -8,10 +8,28 @@ const http = require('http');
 const { spawn } = require('child_process');
 
 const APP_DIR = path.join(__dirname, '..');
-const DATA = path.join(app.getPath('appData'), 'EzPanel'); // %APPDATA%\EzPanel: cài đặt, công cụ, sao lưu, nhật ký
+const DATA = path.join(app.getPath('appData'), 'Sitebench'); // %APPDATA%\Sitebench: cài đặt, công cụ, sao lưu, nhật ký
 const ICONS = path.join(__dirname, 'icons');
-const RUN_NAME = 'EzPanel'; // tên khóa "chạy cùng Windows"
+// Chạy cùng Windows: dùng tên mặc định của Electron (mã ứng dụng) cho cả ghi lẫn đọc.
+// Bản 3.0.0–3.0.7 ghi dưới tên "Sitebench" nhưng hàm đọc của Electron tìm theo mã ứng dụng → công tắc luôn hiện "tắt".
+const LEGACY_RUN_NAMES = ['EzPanel', 'tPanel'];
 
+// EzPanel → Sitebench (3.0.9): chuyển %APPDATA%\EzPanel thành %APPDATA%\Sitebench TRƯỚC khi Electron tạo thư mục mới
+;(function migrateDataDir() {
+  // Electron có thể đã tự tạo thư mục Sitebench (Crashpad, Local State…) trước khi đoạn này chạy,
+  // nên xét theo config.json chứ không theo việc thư mục đã tồn tại
+  const old = path.join(app.getPath('appData'), 'EzPanel');
+  try {
+    if (fs.existsSync(path.join(DATA, 'config.json')) || !fs.existsSync(path.join(old, 'config.json'))) return;
+    fs.mkdirSync(DATA, { recursive: true });
+    for (const name of fs.readdirSync(old)) {
+      const from = path.join(old, name), to = path.join(DATA, name);
+      if (fs.existsSync(to)) continue; // Electron vừa tạo: giữ bản mới
+      try { fs.renameSync(from, to); } catch { fs.cpSync(from, to, { recursive: true }); } // tệp đang bị giữ: chép sang
+    }
+    try { fs.writeFileSync(path.join(old, 'DA-CHUYEN-SANG-SITEBENCH.txt'), `Dữ liệu đã chuyển sang ${DATA}\n`); } catch { /* bỏ qua */ }
+  } catch { /* để bước sau báo lỗi rõ ràng nếu thiếu dữ liệu */ }
+})();
 app.setPath('userData', path.join(DATA, 'electron'));
 app.setAppUserModelId('vn.ezpanel.app');
 if (!app.requestSingleInstanceLock()) { app.quit(); return; }
@@ -45,7 +63,7 @@ const readConfig = () => { try { return JSON.parse(fs.readFileSync(path.join(DAT
 const token = () => { try { return fs.readFileSync(path.join(DATA, 'tools', '.control-token'), 'utf8').trim(); } catch { return ''; } };
 const base = () => `http://localhost:${port}`;
 
-// Gọi API của EzPanel bằng mã điều khiển (giống ứng dụng khay cũ)
+// Gọi API của Sitebench bằng mã điều khiển (giống ứng dụng khay cũ)
 function request(method, p, body, timeout = 8000) {
   return new Promise(resolve => {
     const data = body ? JSON.stringify(body) : null;
@@ -76,7 +94,7 @@ function startServer() {
   fs.mkdirSync(path.join(DATA, 'logs'), { recursive: true });
   const out = fs.createWriteStream(path.join(DATA, 'logs', 'server.log'), { flags: 'a' });
   server = utilityProcess.fork(path.join(APP_DIR, 'server.js'), [], {
-    cwd: APP_DIR, stdio: 'pipe', serviceName: 'EzPanel',
+    cwd: APP_DIR, stdio: 'pipe', serviceName: 'Sitebench',
     env: { ...process.env, TPANEL_DATA: DATA, LOCALPANEL_TRAY: '1', TPANEL_ELECTRON: '1' },
   });
   server.stdout?.pipe(out);
@@ -88,7 +106,7 @@ function startServer() {
     restarts++;
     log(`Phần xử lý dừng bất ngờ (mã ${code}), lần ${restarts}`);
     if (restarts <= 5) setTimeout(() => { startServer(); reloadWhenReady(); }, 2000);
-    else notify('EzPanel gặp lỗi', `Phần xử lý dừng nhiều lần. Xem nhật ký: ${path.join(DATA, 'logs', 'server.log')}`);
+    else notify('Sitebench gặp lỗi', `Phần xử lý dừng nhiều lần. Xem nhật ký: ${path.join(DATA, 'logs', 'server.log')}`);
   });
 }
 async function reloadWhenReady() {
@@ -112,14 +130,14 @@ function saveState() {
   try { fs.mkdirSync(path.dirname(stateFile()), { recursive: true }); fs.writeFileSync(stateFile(), JSON.stringify({ ...win.getNormalBounds(), maximized: win.isMaximized() })); } catch { /* bỏ qua */ }
 }
 const LOADING = `data:text/html;charset=utf-8,${encodeURIComponent(`<html><body style="margin:0;height:100vh;display:grid;place-items:center;background:#0b1630;color:#c3cee2;font:15px 'Segoe UI',sans-serif">
-  <div style="text-align:center"><div style="width:34px;height:34px;margin:0 auto 14px;border:3px solid #1e3a6e;border-top-color:#2fd0f5;border-radius:50%;animation:s 1s linear infinite"></div>Đang mở EzPanel…</div>
+  <div style="text-align:center"><div style="width:34px;height:34px;margin:0 auto 14px;border:3px solid #1e3a6e;border-top-color:#2fd0f5;border-radius:50%;animation:s 1s linear infinite"></div>Đang mở Sitebench…</div>
   <style>@keyframes s{to{transform:rotate(360deg)}}</style></body></html>`)}`;
 
 function createWindow() {
   const st = readState();
   win = new BrowserWindow({
     width: st.width || 1320, height: st.height || 880, x: st.x, y: st.y, minWidth: 880, minHeight: 560,
-    show: false, title: 'EzPanel', icon: path.join(ICONS, process.platform === 'win32' ? 'tpanel.ico' : 'app.png'),
+    show: false, title: 'Sitebench', icon: path.join(ICONS, process.platform === 'win32' ? 'sitebench.ico' : 'app.png'),
     backgroundColor: '#0b1630', autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, sandbox: true, spellcheck: false },
   });
@@ -137,7 +155,7 @@ function createWindow() {
     e.preventDefault();
     win.hide();
     if (!readState().tipShown) {
-      notify('EzPanel vẫn chạy ở khay hệ thống', 'Apache, MySQL và các site vẫn hoạt động. Chuột phải biểu tượng EzPanel để thoát hẳn.');
+      notify('Sitebench vẫn chạy ở khay hệ thống', 'Apache, MySQL và các site vẫn hoạt động. Chuột phải biểu tượng Sitebench để thoát hẳn.');
       try { fs.writeFileSync(stateFile(), JSON.stringify({ ...readState(), tipShown: true })); } catch { /* bỏ qua */ }
     }
   });
@@ -146,7 +164,7 @@ function createWindow() {
   waitReady().then(ok => {
     if (!win || win.isDestroyed()) return;
     if (ok) win.loadURL(`${base()}/`);
-    else win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(`<body style="font:15px Segoe UI;padding:2rem;background:#0b1630;color:#fff">EzPanel chưa khởi động được. Xem nhật ký: ${path.join(DATA, 'logs', 'server.log')}</body>`)}`);
+    else win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(`<body style="font:15px Segoe UI;padding:2rem;background:#0b1630;color:#fff">Sitebench chưa khởi động được. Xem nhật ký: ${path.join(DATA, 'logs', 'server.log')}</body>`)}`);
   });
 }
 function showWindow(hash) {
@@ -175,12 +193,37 @@ function trayImage() {
 }
 async function svc(name, action) {
   const r = await request('POST', `/api/laragon/services/${name}/${action}`, null, 120000);
-  if (r.json?.message) notify('EzPanel', r.json.message);
-  else if (r.json?.error) notify('EzPanel', r.json.error);
+  if (r.json?.message) notify('Sitebench', r.json.message);
+  else if (r.json?.error) notify('Sitebench', r.json.error);
   pollStatus();
 }
-function autostart() { return app.getLoginItemSettings({ path: process.execPath, args: ['--background'], name: RUN_NAME }).openAtLogin; }
-function setAutostart(on) { app.setLoginItemSettings({ openAtLogin: !!on, path: process.execPath, args: ['--background'], name: RUN_NAME }); return autostart(); }
+const LOGIN = () => ({ path: process.execPath, args: ['--background'] });
+function autostart() { return app.getLoginItemSettings(LOGIN()).openAtLogin; }
+function setAutostart(on) { app.setLoginItemSettings({ openAtLogin: !!on, ...LOGIN() }); return autostart(); }
+// Dọn khóa tên cũ trong HKCU\...\Run; nếu có thì bật lại bằng tên đúng (giữ lựa chọn của người dùng)
+function migrateRunKeys() {
+  if (process.platform !== 'win32') return;
+  const KEY = 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run';
+  const { execFileSync } = require('child_process');
+  let found = false;
+  for (const name of LEGACY_RUN_NAMES) {
+    try {
+      execFileSync('reg', ['query', KEY, '/v', name], { windowsHide: true, stdio: 'ignore' });
+      found = true;
+      execFileSync('reg', ['delete', KEY, '/v', name, '/f'], { windowsHide: true, stdio: 'ignore' });
+      log(`Đã dọn khóa chạy cùng Windows tên cũ: ${name}`);
+    } catch { /* không có khóa này */ }
+  }
+  if (found && app.isPackaged) setAutostart(true);
+  // Đang bật chạy cùng Windows nhưng khóa còn trỏ tới tệp chạy cũ (EzPanel.exe): trỏ lại sang tệp hiện tại
+  try {
+    const out = execFileSync('reg', ['query', KEY, '/v', 'vn.ezpanel.app'] /* tên khóa = mã ứng dụng, giữ nguyên qua các lần đổi tên */, { windowsHide: true }).toString();
+    if (app.isPackaged && /ezpanel\.exe/i.test(out) && !out.toLowerCase().includes(process.execPath.toLowerCase())) {
+      setAutostart(true);
+      log('Đã trỏ chạy cùng Windows sang', process.execPath);
+    }
+  } catch { /* chưa bật chạy cùng Windows */ }
+}
 function buildMenu() {
   const s = status.raw;
   const row = (key, label) => {
@@ -193,7 +236,7 @@ function buildMenu() {
     ];
   };
   return Menu.buildFromTemplate([
-    { label: 'Mở EzPanel', click: () => showWindow(), default: true },
+    { label: 'Mở Sitebench', click: () => showWindow(), default: true },
     { type: 'separator' },
     ...row('apache', 'Apache'), ...row('mysql', 'MySQL'),
     { label: 'Bật tất cả', click: () => svc('all', 'start') },
@@ -204,8 +247,8 @@ function buildMenu() {
     { label: 'Nhật ký', click: () => showWindow('logs') },
     { type: 'separator' },
     { label: 'Chạy cùng Windows', type: 'checkbox', checked: autostart(), click: m => setAutostart(m.checked) },
-    { label: 'Khởi động lại EzPanel', click: async () => { await stopServer(); restarts = 0; startServer(); reloadWhenReady(); } },
-    { label: 'Thoát EzPanel', click: () => quit() },
+    { label: 'Khởi động lại Sitebench', click: async () => { await stopServer(); restarts = 0; startServer(); reloadWhenReady(); } },
+    { label: 'Thoát Sitebench', click: () => quit() },
   ]);
 }
 async function pollStatus() {
@@ -215,13 +258,13 @@ async function pollStatus() {
   }
   if (tray && !tray.isDestroyed()) {
     tray.setImage(trayImage());
-    tray.setToolTip(`EzPanel — Apache: ${STATE_TEXT[status.apache]} · MySQL: ${STATE_TEXT[status.mysql]}`);
+    tray.setToolTip(`Sitebench — Apache: ${STATE_TEXT[status.apache]} · MySQL: ${STATE_TEXT[status.mysql]}`);
     tray.setContextMenu(buildMenu());
   }
 }
 function createTray() {
   tray = new Tray(trayImage());
-  tray.setToolTip('EzPanel');
+  tray.setToolTip('Sitebench');
   tray.on('click', () => showWindow());
   tray.on('double-click', () => showWindow());
   tray.setContextMenu(buildMenu());
@@ -233,6 +276,11 @@ async function quit() {
   saveState();
   await stopServer();
   if (tray) tray.destroy();
+  // Đã tải bản mới: cài im lặng khi thoát (không tự mở lại, vì người dùng đang thoát)
+  if (updater && updateState.downloaded) {
+    log(`Cài bản ${updateState.downloaded} khi thoát`);
+    try { updater.quitAndInstall(true, false); return; } catch (e) { log('Không cài được khi thoát:', e.message); }
+  }
   app.exit(0);
 }
 
@@ -249,35 +297,72 @@ ipcMain.handle('autostart:get', () => autostart());
 ipcMain.handle('autostart:set', (e, on) => setAutostart(on));
 ipcMain.handle('app:info', () => ({ version: app.getVersion(), packaged: app.isPackaged, data: DATA, electron: process.versions.electron }));
 
-// Cập nhật: GitHub Releases (electron-updater) hoặc tệp bộ cài tải về
+// Cập nhật: GitHub Releases (electron-updater) hoặc tệp bộ cài tải về.
+// Tự tải ngầm (có công tắc): kiểm tra 1 phút sau khi mở rồi mỗi 6 giờ, tải phần thay đổi, cài khi thoát Sitebench.
+// Bản thử nghiệm (pre-release trên GitHub) chỉ nhận khi bật "Nhận bản thử nghiệm" ở máy đó.
 let updater = null;
-function getUpdater(repo) {
+let updateState = { checking: false, available: null, percent: null, downloaded: null, error: null };
+function setUpdateState(patch) {
+  Object.assign(updateState, patch);
+  if (win && !win.isDestroyed()) win.webContents.send('update:state', updateState);
+}
+function getUpdater(repo, prerelease) {
   if (!app.isPackaged) throw new Error('Chỉ cập nhật được bản đã cài đặt.');
   const [owner, name] = String(repo || '').split('/');
   if (!owner || !name) throw new Error('Chưa cấu hình kho GitHub (chu-so-huu/ten-kho).');
   if (!updater) {
     updater = require('electron-updater').autoUpdater;
     updater.autoDownload = false;
-    updater.autoInstallOnAppQuit = true;
-    updater.on('download-progress', p => win?.webContents.send('update:progress', Math.round(p.percent)));
+    updater.autoInstallOnAppQuit = false; // Sitebench tự cài trong quit() (app.exit bỏ qua cơ chế tự động)
+    updater.on('checking-for-update', () => setUpdateState({ checking: true, error: null }));
+    updater.on('update-available', i => setUpdateState({ checking: false, available: i.version }));
+    updater.on('update-not-available', () => setUpdateState({ checking: false, available: null }));
+    updater.on('download-progress', p => {
+      setUpdateState({ percent: Math.round(p.percent) });
+      win?.webContents.send('update:progress', Math.round(p.percent));
+    });
+    updater.on('update-downloaded', i => {
+      setUpdateState({ downloaded: i.version, percent: 100 });
+      notify(`Sitebench ${i.version} đã tải xong`, 'Bản mới sẽ được cài khi bạn thoát Sitebench. Hoặc vào Cài đặt → Cập nhật → Cài ngay.');
+      log(`Đã tải bản ${i.version}, chờ cài khi thoát`);
+    });
+    updater.on('error', e => { setUpdateState({ checking: false, error: e.message }); log('Lỗi cập nhật:', e.message); });
   }
+  updater.allowPrerelease = !!prerelease;
   updater.setFeedURL({ provider: 'github', owner, repo: name });
   return updater;
 }
-ipcMain.handle('update:check', async (e, repo) => {
-  const u = getUpdater(repo);
+async function updatePrefs() {
+  const r = await request('GET', '/api/selfupdate', null, 5000);
+  return r.json || {};
+}
+// Tự kiểm tra và tải ngầm (khi bật công tắc)
+async function autoUpdateCycle() {
+  try {
+    if (!app.isPackaged || quitting || updateState.downloaded) return;
+    const p = await updatePrefs();
+    if (!p.repo || p.autoDownload === false) return;
+    const u = getUpdater(p.repo, p.prerelease);
+    u.autoDownload = true;
+    await u.checkForUpdates();
+  } catch (e) { log('Tự kiểm tra cập nhật:', e.message); }
+}
+ipcMain.handle('update:state', () => updateState);
+ipcMain.handle('update:check', async (e, repo, prerelease) => {
+  const u = getUpdater(repo, prerelease);
+  u.autoDownload = false;
   const r = await u.checkForUpdates();
   const latest = r?.updateInfo?.version;
-  return { current: app.getVersion(), latest, available: !!latest && latest !== app.getVersion() && r?.isUpdateAvailable !== false, notes: r?.updateInfo?.releaseNotes || null };
+  return { current: app.getVersion(), latest, available: !!latest && latest !== app.getVersion() && r?.isUpdateAvailable !== false, notes: r?.updateInfo?.releaseNotes || null, downloaded: updateState.downloaded };
 });
 ipcMain.handle('update:download', async () => { if (!updater) throw new Error('Chưa kiểm tra bản mới.'); await updater.downloadUpdate(); return true; });
 ipcMain.handle('update:install', async () => { quitting = true; await stopServer(); updater.quitAndInstall(true, true); });
-// Cập nhật bằng tệp bộ cài: chạy im lặng rồi tự mở lại EzPanel
+// Cập nhật bằng tệp bộ cài: chạy im lặng rồi tự mở lại Sitebench
 ipcMain.handle('update:from-file', async () => {
-  const r = await dialog.showOpenDialog(win, { title: 'Chọn tệp bộ cài EzPanel', properties: ['openFile'], filters: [{ name: 'Bộ cài EzPanel', extensions: ['exe'] }] });
+  const r = await dialog.showOpenDialog(win, { title: 'Chọn tệp bộ cài Sitebench', properties: ['openFile'], filters: [{ name: 'Bộ cài Sitebench', extensions: ['exe'] }] });
   if (r.canceled) return false;
   const file = r.filePaths[0];
-  if (!/ezpanel|tpanel/i.test(path.basename(file))) throw new Error('Hãy chọn tệp EzPanel-Setup-x.y.z.exe.');
+  if (!/sitebench|ezpanel|tpanel/i.test(path.basename(file))) throw new Error('Hãy chọn tệp Sitebench-Setup-x.y.z.exe.');
   quitting = true;
   await stopServer();
   spawn(file, ['/S', '--force-run'], { detached: true, stdio: 'ignore' }).unref();
@@ -291,10 +376,14 @@ app.on('second-instance', () => showWindow());
 app.on('window-all-closed', e => { /* vẫn chạy ở khay */ });
 app.whenReady().then(() => {
   try { migrateLegacy(); } catch (e) { log('Lỗi chuyển dữ liệu:', e.message); }
+  try { migrateRunKeys(); } catch (e) { log('Lỗi dọn khóa chạy cùng Windows:', e.message); }
   startServer();
   createTray();
   if (!background) createWindow(), win.once('ready-to-show', () => win.show());
   waitReady().then(() => pollStatus());
+  // Tự kiểm tra cập nhật: 1 phút sau khi mở, rồi mỗi 6 giờ
+  setTimeout(autoUpdateCycle, 60 * 1000);
+  setInterval(autoUpdateCycle, 6 * 3600 * 1000);
   // Chỉ dùng khi kiểm thử: chụp cửa sổ rồi thoát
   if (process.env.TPANEL_SHOT) {
     waitReady().then(() => setTimeout(async () => {

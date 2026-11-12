@@ -1,24 +1,24 @@
-# EzPanel
+# Sitebench
 
 Bảng điều khiển máy chủ local cho Windows: Apache, PHP, MySQL/MariaDB, WordPress/WooCommerce, HTTPS, email thử (Mailpit), terminal, sao lưu. Chạy độc lập (tự quản lý máy chủ) hoặc dùng Laragon có sẵn.
 
-> Trước đây có tên **tPanel** (và LocalPanel). Bộ cài EzPanel tự nhận ra tPanel 2.0.x, giữ lại cài đặt, sao lưu và lựa chọn "chạy cùng Windows", rồi gỡ bản cũ. Máy chủ (ví dụ `D:\tPanel`), dự án và database giữ nguyên.
+> Trước đây có tên **EzPanel** (và tPanel, LocalPanel). Bản 3.0.9 tự cập nhật thẳng từ EzPanel: dữ liệu `%APPDATA%\EzPanel` được chuyển sang `%APPDATA%\Sitebench`, giữ mật khẩu, cài đặt, sao lưu và chế độ chạy cùng Windows. Máy chủ (ví dụ `D:\tPanel`), dự án và database giữ nguyên. Tên các tệp kỹ thuật (`.tpanel.json`, `tpanel.json`, `ezpanel-ca.php`…) được giữ để không ảnh hưởng dự án.
 
 ## Cài đặt
 
-Chạy `EzPanel-Setup-x.y.z.exe`. Không cần quyền admin, không cần cài gì trước (Node.js đã có sẵn bên trong). Windows có thể báo "Windows protected your PC" vì bộ cài chưa ký số: bấm **More info → Run anyway**.
+Chạy `Sitebench-Setup-x.y.z.exe`. Không cần quyền admin, không cần cài gì trước (Node.js đã có sẵn bên trong). Windows có thể báo "Windows protected your PC" vì bộ cài chưa ký số: bấm **More info → Run anyway**.
 
 Lần đầu mở, trình hướng dẫn giúp đặt mật khẩu và chọn:
 
-- **EzPanel tự quản lý máy chủ** (khuyên dùng): tải Apache (Apache Lounge), PHP (windows.php.net), MySQL (dev.mysql.com) hoặc MariaDB, Node.js LTS (cho npm trong terminal dự án); tự tạo cấu hình, khởi tạo database. Mọi dự án chạy PHP qua FastCGI, giống PHP-FPM trên hosting.
-- **Dùng Laragon đã cài**: EzPanel tự tìm Laragon trên các ổ đĩa.
+- **Sitebench tự quản lý máy chủ** (khuyên dùng): tải Apache (Apache Lounge), PHP (windows.php.net), MySQL (dev.mysql.com) hoặc MariaDB, Node.js LTS (cho npm trong terminal dự án); tự tạo cấu hình, khởi tạo database. Mọi dự án chạy PHP qua FastCGI, giống PHP-FPM trên hosting.
+- **Dùng Laragon đã cài**: Sitebench tự tìm Laragon trên các ổ đĩa.
 
 ## Ứng dụng
 
-- Cửa sổ riêng (Electron), biểu tượng ở khay hệ thống với hai đèn Apache / MySQL; đóng cửa sổ thì thu vào khay, Apache/MySQL vẫn chạy. Thoát hẳn: chuột phải biểu tượng → Thoát EzPanel.
+- Cửa sổ riêng (Electron), biểu tượng ở khay hệ thống với hai đèn Apache / MySQL; đóng cửa sổ thì thu vào khay, Apache/MySQL vẫn chạy. Thoát hẳn: chuột phải biểu tượng → Thoát Sitebench.
 - Chạy cùng Windows: Cài đặt → Ứng dụng desktop, hoặc menu khay.
 - Ô đường dẫn có nút **Chọn…** (hộp thoại chọn thư mục của Windows).
-- Dữ liệu của EzPanel (cài đặt, sao lưu, nhật ký, công cụ): `%APPDATA%\EzPanel`. Gỡ cài đặt không xóa dữ liệu này, cũng không xóa thư mục máy chủ.
+- Dữ liệu của Sitebench (cài đặt, sao lưu, nhật ký, công cụ): `%APPDATA%\Sitebench`. Gỡ cài đặt không xóa dữ liệu này, cũng không xóa thư mục máy chủ.
 
 ## Tính năng
 
@@ -32,9 +32,11 @@ Lần đầu mở, trình hướng dẫn giúp đặt mật khẩu và chọn:
 
 ## Cập nhật
 
-**EzPanel** (Cài đặt → Cập nhật):
-- **Từ tệp bộ cài**: chọn `EzPanel-Setup-x.y.z.exe`; EzPanel tắt, cài đè im lặng (giữ dữ liệu) rồi tự mở lại.
-- **Tự động qua GitHub Releases**: nhập kho GitHub (chu-so-huu/ten-kho); EzPanel kiểm tra, tải phần thay đổi (blockmap) và cài khi bấm.
+**Sitebench** (Cài đặt → Cập nhật):
+- **Tự tải bản mới** (mặc định bật): kiểm tra 1 phút sau khi mở rồi mỗi 6 giờ, tải ngầm phần thay đổi, **cài khi thoát Sitebench** (Apache/MySQL vẫn chạy); có nút **Cài ngay**. Tắt công tắc thì chỉ báo khi có bản mới.
+- **Bản thử nghiệm**: khi phát hành, tick "Bản thử nghiệm" → bản được đánh dấu Pre-release, chỉ máy bật **Nhận bản thử nghiệm** mới nhận. Thử ổn thì trên GitHub sửa bản phát hành: bỏ "Set as a pre-release", chọn "Set as the latest release" → mọi máy tự nhận.
+- **Từ tệp bộ cài**: chọn `Sitebench-Setup-x.y.z.exe`; Sitebench tắt, cài đè im lặng (giữ dữ liệu) rồi tự mở lại.
+- **Tự động qua GitHub Releases**: nhập kho GitHub (chu-so-huu/ten-kho); Sitebench kiểm tra, tải phần thay đổi (blockmap) và cài khi bấm.
 
 **Phần mềm đi kèm** (máy chủ độc lập): PHP, Apache, MySQL/MariaDB cùng dòng có sao lưu và quay lại; nâng cấp database khác dòng bằng xuất/nạp dữ liệu.
 

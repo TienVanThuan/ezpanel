@@ -9,6 +9,6 @@ const [owner, repo] = String(process.env.RELEASE_REPO || process.env.GITHUB_REPO
 p.version = version;
 // Cấu hình nơi đăng: electron-builder cần để sinh latest.yml (việc tải lên do bước gh release của quy trình làm)
 p.build.publish = [{ provider: 'github', owner, repo, releaseType: 'draft' }];
-p.ezpanelUpdateRepo = `${owner}/${repo}`; // EzPanel dùng làm nguồn tự cập nhật mặc định
+p.ezpanelUpdateRepo = `${owner}/${repo}`; // Sitebench dùng làm nguồn tự cập nhật mặc định
 fs.writeFileSync('package.json', JSON.stringify(p, null, 2));
-console.log(`EzPanel ${version} → đăng lên https://github.com/${owner}/${repo}/releases`);
+console.log(`Sitebench ${version} → đăng lên https://github.com/${owner}/${repo}/releases`);

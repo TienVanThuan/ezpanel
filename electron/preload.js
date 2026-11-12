@@ -9,7 +9,9 @@ contextBridge.exposeInMainWorld('tpanel', {
   getAutostart: () => ipcRenderer.invoke('autostart:get'),
   setAutostart: on => ipcRenderer.invoke('autostart:set', on),
   update: {
-    check: repo => ipcRenderer.invoke('update:check', repo),
+    check: (repo, prerelease) => ipcRenderer.invoke('update:check', repo, prerelease),
+    state: () => ipcRenderer.invoke('update:state'),
+    onState: cb => ipcRenderer.on('update:state', (e, st) => cb(st)),
     download: () => ipcRenderer.invoke('update:download'),
     install: () => ipcRenderer.invoke('update:install'),
     fromFile: () => ipcRenderer.invoke('update:from-file'),
